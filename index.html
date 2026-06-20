@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCIe Controller 验证计划 | Comprehensive Verification Plan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2035;
+            --bg-card-hover: #1f2847;
+            --border-color: #2a3555;
+            --border-accent: #3b82f6;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-pink: #ec4899;
+            --gradient-blue: linear-gradient(135deg, #1e40af, #3b82f6);
+            --gradient-purple: linear-gradient(135deg, #6d28d9, #8b5cf6);
+            --gradient-green: linear-gradient(135deg, #047857, #10b981);
+            --gradient-amber: linear-gradient(135deg, #b45309, #f59e0b);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .bg-animation .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s infinite ease-in-out;
+        }
+        .bg-animation .orb:nth-child(1) { width: 600px; height: 600px; background: #3b82f6; top: -200px; left: -100px; animation-delay: 0s; }
+        .bg-animation .orb:nth-child(2) { width: 500px; height: 500px; background: #8b5cf6; top: 50%; right: -150px; animation-delay: -7s; }
+        .bg-animation .orb:nth-child(3) { width: 400px; height: 400px; background: #06b6d4; bottom: -100px; left: 30%; animation-delay: -14s; }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo { font-weight: 700; font-size: 1.1rem; background: linear-gradient(90deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--accent-cyan); }
+        .nav-links a.active { color: var(--accent-cyan); }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+
+        .hero { padding: 140px 0 80px; text-align: center; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.1; }
+        .hero h1 span { background: linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.2rem; color: var(--text-secondary); max-width: 800px; margin: 0 auto 2rem; }
+        .hero-stats { display: flex; justify-content: center; gap: 3rem; margin-top: 3rem; flex-wrap: wrap; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 2.5rem; font-weight: 700; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace; }
+        .stat-label { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        .section { padding: 80px 0; }
+        .section-header { margin-bottom: 3rem; }
+        .section-header h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .section-header p { color: var(--text-secondary); font-size: 1.05rem; max-width: 700px; }
+        .section-line { width: 80px; height: 4px; background: linear-gradient(90deg, #3b82f6, #06b6d4); border-radius: 2px; margin-top: 1rem; }
+
+        .architecture-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .arch-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .arch-card:hover { transform: translateY(-5px); border-color: var(--border-accent); background: var(--bg-card-hover); }
+        .arch-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--gradient-blue); }
+        .arch-card.physical::before { background: var(--gradient-green); }
+        .arch-card.d2d::before { background: var(--gradient-purple); }
+        .arch-card.protocol::before { background: var(--gradient-blue); }
+        .arch-card.support::before { background: var(--gradient-amber); }
+        .arch-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .arch-card h3 { font-size: 1.3rem; margin-bottom: 0.75rem; }
+        .arch-card ul { list-style: none; }
+        .arch-card li { color: var(--text-secondary); font-size: 0.95rem; padding: 0.4rem 0; padding-left: 1.2rem; position: relative; }
+        .arch-card li::before { content: '▸'; position: absolute; left: 0; color: var(--accent-cyan); }
+
+        .filter-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2rem; }
+        .filter-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .filter-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+        .filter-btn.active { background: rgba(59, 130, 246, 0.2); border-color: var(--accent-blue); color: var(--text-primary); }
+
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.25rem; }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        .feature-card:hover { border-color: var(--accent-cyan); transform: translateY(-3px); }
+        .feature-tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .tag-d2d { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); }
+        .tag-phy { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .tag-proto { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+        .tag-pm { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+        .tag-err { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .tag-perf { background: rgba(236, 72, 153, 0.15); color: var(--accent-pink); }
+        .feature-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .feature-card p { color: var(--text-secondary); font-size: 0.9rem; }
+        .feature-card.hidden { display: none; }
+
+        .testplan-table { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; }
+        .table-header { display: grid; grid-template-columns: 100px 1fr 120px 180px 140px; gap: 1rem; padding: 1rem 1.5rem; background: rgba(59, 130, 246, 0.1); border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 0.85rem; color: var(--accent-cyan); }
+        .table-row { display: grid; grid-template-columns: 100px 1fr 120px 180px 140px; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); transition: all 0.2s; align-items: center; }
+        .table-row:hover { background: var(--bg-card-hover); }
+        .table-row:last-child { border-bottom: none; }
+        .tc-id { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent-cyan); font-size: 0.85rem; }
+        .tc-desc { color: var(--text-secondary); font-size: 0.9rem; }
+        .tc-priority { text-align: center; }
+        .tc-strategy { text-align: center; }
+        .tc-category { text-align: center; }
+        .priority { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+        .p-high { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .p-medium { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+        .p-low { background: rgba(100, 116, 139, 0.15); color: var(--text-muted); }
+        .strategy { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+        .category { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); }
+
+        .coverage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .coverage-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; text-align: center; transition: all 0.3s; }
+        .coverage-card:hover { transform: scale(1.02); border-color: var(--accent-cyan); }
+        .coverage-ring { position: relative; width: 140px; height: 140px; margin: 0 auto 1.5rem; }
+        .coverage-ring svg { transform: rotate(-90deg); }
+        .coverage-ring .fill { stroke-dasharray: 440; stroke-dashoffset: 440; transition: stroke-dashoffset 2s ease; }
+        .coverage-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .coverage-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .coverage-card p { color: var(--text-secondary); font-size: 0.85rem; }
+
+        .corner-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+        .corner-card { background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 1.5rem; }
+        .corner-card h3 { color: var(--accent-red); font-size: 1.1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .corner-card ul { list-style: none; }
+        .corner-card li { color: var(--text-secondary); font-size: 0.9rem; padding: 0.3rem 0; padding-left: 1.2rem; position: relative; }
+        .corner-card li::before { content: '⚠'; position: absolute; left: 0; color: var(--accent-red); font-size: 0.8rem; }
+
+        .footer { text-align: center; padding: 60px 0; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; }
+
+        .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+        .animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .nav-links { display: none; }
+            .table-header, .table-row { grid-template-columns: 80px 1fr 80px; }
+            .tc-strategy, .tc-category { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-logo">UCIe Verification</div>
+        <div class="nav-links">
+            <a href="#architecture" class="active">架构</a>
+            <a href="#features">Feature List</a>
+            <a href="#testplan">Testplan</a>
+            <a href="#coverage">Coverage</a>
+            <a href="#corners">Corner Cases</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero">
+            <div class="hero-badge">
+                <span>🔷</span> Universal Chiplet Interconnect Express
+            </div>
+            <h1>UCIe Controller <span>验证计划</span></h1>
+            <p>面向 2.5D/3D 封装、多 Die 互连场景，系统覆盖 D2D Adapter、Physical Layer、Protocol Layer、电源管理、错误恢复与性能验证的全栈验证方案。</p>
+            <div class="hero-stats">
+                <div class="stat-item"><div class="stat-number" data-target="124">0</div><div class="stat-label">测试用例</div></div>
+                <div class="stat-item"><div class="stat-number" data-target="42">0</div><div class="stat-label">功能验证点</div></div>
+                <div class="stat-item"><div class="stat-number" data-target="10">0</div><div class="stat-label">验证类别</div></div>
+                <div class="stat-item"><div class="stat-number" data-target="95">0</div><div class="stat-label">覆盖率目标 (%)</div></div>
+            </div>
+        </section>
+
+        <section class="section" id="architecture">
+            <div class="section-header animate-on-scroll">
+                <h2>01. UCIe 协议栈架构分析</h2>
+                <p>从底层物理链路到上层协议映射，逐层拆解验证对象。</p>
+                <div class="section-line"></div>
+            </div>
+            <div class="architecture-grid">
+                <div class="arch-card protocol animate-on-scroll">
+                    <div class="arch-icon">📦</div>
+                    <h3>Protocol Layer</h3>
+                    <ul>
+                        <li>PCIe 协议映射（Flit/Non-Flit）</li>
+                        <li>CXL.io / CXL.mem / CXL.cache 支持</li>
+                        <li>AXI-4 / CXS 协议桥接</li>
+                        <li>事务排序、Req/Resp/Cmp 路由</li>
+                        <li>VC 仲裁与反压管理</li>
+                    </ul>
+                </div>
+                <div class="arch-card d2d animate-on-scroll">
+                    <div class="arch-icon">🔄</div>
+                    <h3>D2D Adapter Layer</h3>
+                    <ul>
+                        <li>链路训练（Link Training）与状态机</li>
+                        <li>数据包封装、Parity / CRC 生成</li>
+                        <li>重传机制（Retry / ACK/NAK）</li>
+                        <li>流控与远程 Stalldet</li>
+                        <li>边带（Sideband）消息处理</li>
+                    </ul>
+                </div>
+                <div class="arch-card physical animate-on-scroll">
+                    <div class="arch-icon">⚡</div>
+                    <h3>Physical Layer</h3>
+                    <ul>
+                        <li>Mainband / Sideband 电气接口</li>
+                        <li>8 / 16 / 32 GT/s 速率训练</li>
+                        <li>Lane 反转、极性反转、Lane 修复</li>
+                        <li>均衡（EQ）、眼图训练</li>
+                        <li>时钟、Reset、PM 状态同步</li>
+                    </ul>
+                </div>
+                <div class="arch-card support animate-on-scroll">
+                    <div class="arch-icon">🛡️</div>
+                    <h3>System 支持</h3>
+                    <ul>
+                        <li>电源管理（L0 / L1 / L2 / Retrain）</li>
+                        <li>错误注入、检测与恢复</li>
+                        <li>寄存器 CSR 配置与中断</li>
+                        <li>性能压力与带宽延迟测试</li>
+                        <li>复位、热插拔、多 Die 拓扑</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="features">
+            <div class="section-header animate-on-scroll">
+                <h2>02. Feature List</h2>
+                <p>按层次与场景分类的功能验证点，点击标签可筛选。</p>
+                <div class="section-line"></div>
+            </div>
+            <div class="filter-bar animate-on-scroll">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="d2d">D2D Adapter</button>
+                <button class="filter-btn" data-filter="phy">Physical Layer</button>
+                <button class="filter-btn" data-filter="proto">Protocol Layer</button>
+                <button class="filter-btn" data-filter="pm">电源管理</button>
+                <button class="filter-btn" data-filter="err">错误恢复</button>
+                <button class="filter-btn" data-filter="perf">性能</button>
+            </div>
+            <div class="feature-grid" id="featureGrid">
+                <!-- D2D -->
+                <div class="feature-card" data-category="d2d"><span class="feature-tag tag-d2d">D2D Adapter</span><h3>链路初始化训练</h3><p>覆盖 Train.SB、Train.LB、Train.MB 各子状态，验证参数交换、速率协商、Lane 对齐。</p></div>
+                <div class="feature-card" data-category="d2d"><span class="feature-tag tag-d2d">D2D Adapter</span><h3>Lane 修复与降级</h3><p>单 Lane 坏线、多 Lane 坏线、Lane 反转、极性反转的自动修复与链路降级。</p></div>
+                <div class="feature-card" data-category="d2d"><span class="feature-tag tag-d2d">D2D Adapter</span><h3>CRC / Parity 校验</h3><p>Mainband 数据 CRC 生成与校验、Parity 检测、错误标记上报。</p></div>
+                <div class="feature-card" data-category="d2d"><span class="feature-tag tag-d2d">D2D Adapter</span><h3>重传与 Retry 机制</h3><p>ACK/NAK 超时、NAK 触发重传、重传次数溢出、Replay Buffer 管理。</p></div>
+                <div class="feature-card" data-category="d2d"><span class="feature-tag tag-d2d">D2D Adapter</span><h3>流控与 Credit 管理</h3><p>接收端反压、远程 Stalldet、Credit 累计/耗尽、头数据分离流控。</p></div>
+                <div class="feature-card" data-category="d2d"><span class="feature-tag tag-d2d">D2D Adapter</span><h3>Sideband 消息</h3><p>参数请求/响应、链路状态通知、PM 请求、错误消息传递。</p></div>
+                <div class="feature-card" data-category="d2d"><span class="feature-tag tag-d2d">D2D Adapter</span><h3>Die 间时钟域 crossing</h3><p>异步时钟、同步时钟、CDC FIFO、跨 Die 时钟漂移补偿。</p></div>
+                <!-- PHY -->
+                <div class="feature-card" data-category="phy"><span class="feature-tag tag-phy">Physical Layer</span><h3>多速率训练</h3><p>8GT/s、16GT/s、32GT/s 速率协商、Downgrade/Upgrade 流程。</p></div>
+                <div class="feature-card" data-category="phy"><span class="feature-tag tag-phy">Physical Layer</span><h3>电气信号完整性</h3><p>眼图、抖动、电压摆幅、去加重、均衡系数训练。</p></div>
+                <div class="feature-card" data-category="phy"><span class="feature-tag tag-phy">Physical Layer</span><h3>Mainband 与 Sideband</h3><p>高速数据通道与低速边带通道的独立训练与协同。</p></div>
+                <div class="feature-card" data-category="phy"><span class="feature-tag tag-phy">Physical Layer</span><h3>时钟与复位</h3><p>Refclk 切换、POR、Warm Reset、Cold Reset、训练复位。</p></div>
+                <div class="feature-card" data-category="phy"><span class="feature-tag tag-phy">Physical Layer</span><h3>LP 与 HS 模式切换</h3><p>Low Power 与 High Speed 模式进入/退出、电平切换。</p></div>
+                <!-- Protocol -->
+                <div class="feature-card" data-category="proto"><span class="feature-tag tag-proto">Protocol Layer</span><h3>PCIe 映射</h3><p>Flit Mode / Non-Flit Mode、TLP 路由、Ordering Rule。</p></div>
+                <div class="feature-card" data-category="proto"><span class="feature-tag tag-proto">Protocol Layer</span><h3>CXL 协议支持</h3><p>CXL.io / CXL.cache / CXL.mem 事务透传与错误映射。</p></div>
+                <div class="feature-card" data-category="proto"><span class="feature-tag tag-proto">Protocol Layer</span><h3>AXI / CXS 桥接</h3><p>AXI4 读写通道、CXS 包映射、ID 路由与保序。</p></div>
+                <div class="feature-card" data-category="proto"><span class="feature-tag tag-proto">Protocol Layer</span><h3>VC 与 TC 映射</h3><p>Virtual Channel 分配、Traffic Class 映射、 arbitration。</p></div>
+                <div class="feature-card" data-category="proto"><span class="feature-tag tag-proto">Protocol Layer</span><h3>原子操作与排序</h3><p>AtomicOps、IDO、RO、Relaxed Ordering、死锁避免。</p></div>
+                <!-- PM -->
+                <div class="feature-card" data-category="pm"><span class="feature-tag tag-pm">电源管理</span><h3>L0s / L1 / L2 状态</h3><p>进入/退出流程、CLK 门控、数据链路状态保持。</p></div>
+                <div class="feature-card" data-category="pm"><span class="feature-tag tag-pm">电源管理</span><h3>Retrain 与动态速率</h3><p>Retrain 触发、速率升降、电源状态切换。</p></div>
+                <div class="feature-card" data-category="pm"><span class="feature-tag tag-pm">电源管理</span><h3>唤醒与 CLK 请求</h3><p>Beacon 唤醒、CLKREQ 信号、低功耗退出握手。</p></div>
+                <!-- Error -->
+                <div class="feature-card" data-category="err"><span class="feature-tag tag-err">错误恢复</span><h3>错误注入</h3><p>CRC 错误、Parity 错误、Lane 错误、Training 失败注入。</p></div>
+                <div class="feature-card" data-category="err"><span class="feature-tag tag-err">错误恢复</span><h3>链路恢复</h3><p>LinkDown 检测、Recovery 状态、重新训练、错误上报。</p></div>
+                <div class="feature-card" data-category="err"><span class="feature-tag tag-err">错误恢复</span><h3>Fatal / Non-Fatal 分类</h3><p>错误严重级别分类、中断触发、降级策略。</p></div>
+                <!-- Perf -->
+                <div class="feature-card" data-category="perf"><span class="feature-tag tag-perf">性能</span><h3>带宽与吞吐</h3><p>峰值带宽、有效吞吐、不同 payload 大小下的效率。</p></div>
+                <div class="feature-card" data-category="perf"><span class="feature-tag tag-perf">性能</span><h3>延迟测试</h3><p>Round-trip Latency、首包延迟、最差路径延迟。</p></div>
+                <div class="feature-card" data-category="perf"><span class="feature-tag tag-perf">性能</span><h3>压力与反压</h3><p>满负荷、Credit 耗尽、头阻塞、随机时序压力。</p></div>
+            </div>
+        </section>
+
+        <section class="section" id="testplan">
+            <div class="section-header animate-on-scroll">
+                <h2>03. Testplan</h2>
+                <p>124 条详细测试用例，按模块分类，覆盖正常流程、边界场景与异常恢复。</p>
+                <div class="section-line"></div>
+            </div>
+            <div class="testplan-table">
+                <div class="table-header">
+                    <div>用例 ID</div>
+                    <div>描述</div>
+                    <div class="tc-priority">优先级</div>
+                    <div class="tc-strategy">验证策略</div>
+                    <div class="tc-category">类别</div>
+                </div>
+                <div id="testplanBody">
+                    <!-- DP: D2D Adapter -->
+                    <div class="table-row"><div class="tc-id">DP-001</div><div class="tc-desc">链路初始化：从 POR 到 ACTIVE 的完整训练流程</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-002</div><div class="tc-desc">Train.SB 状态机：边带参数交换与超时</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-003</div><div class="tc-desc">Train.LB 状态机：低速数据通路训练与 BER 校验</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-004</div><div class="tc-desc">Train.MB 状态机：主带高速训练与参数协商</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-005</div><div class="tc-desc">Lane 修复：单 Lane 坏线自动替换到冗余 Lane</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-006</div><div class="tc-desc">Lane 修复：多 Lane 连续坏线的降级与带宽恢复</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-007</div><div class="tc-desc">Lane 反转检测：发送/接收 Lane 顺序反转</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-008</div><div class="tc-desc">极性反转检测：单 Lane P/N 反接</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-009</div><div class="tc-desc">Lane 修复后重训练：修复完成从 Recovery 回到 ACTIVE</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-010</div><div class="tc-desc">CRC 错误生成与检测：Mainband 数据 CRC 错误</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-011</div><div class="tc-desc">Parity 错误检测：Header 与 Data Parity 注入</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-012</div><div class="tc-desc">ACK 正常接收与累计确认</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-013</div><div class="tc-desc">NAK 触发重传：单个包与连续包</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-014</div><div class="tc-desc">ACK 超时重传：对端未响应时自动重发</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-015</div><div class="tc-desc">重传次数溢出：达到最大 Retry 次数后 LinkDown</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-016</div><div class="tc-desc">Replay Buffer 满：触发反压暂停发送</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-017</div><div class="tc-desc">Credit 正常授予与耗尽</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-018</div><div class="tc-desc">Credit 跨包累计：多笔事务后一次性返还</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-019</div><div class="tc-desc">远程 Stalldet 触发：对端无 Credit 时发送端暂停</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-020</div><div class="tc-desc">Sideband 参数请求：REQ / RSP 消息时序</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-021</div><div class="tc-desc">Sideband 消息冲突：同时发起请求与响应</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-022</div><div class="tc-desc">Sideband 超长消息分片与重组</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-023</div><div class="tc-desc">跨 Die 异步时钟域：CDC FIFO 上下溢</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-024</div><div class="tc-desc">动态添加/删除 Header 字段</div><div class="tc-priority"><span class="priority p-low">Low</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-025</div><div class="tc-desc">CRC 校验前数据位翻转：burst 错误</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+                    <div class="table-row"><div class="tc-id">DP-026</div><div class="tc-desc">包乱序到达：对序校验与重排</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">D2D</span></div></div>
+
+                    <!-- PH: Physical Layer -->
+                    <div class="table-row"><div class="tc-id">PH-001</div><div class="tc-desc">8GT/s 速率训练与稳定数据传输</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-002</div><div class="tc-desc">16GT/s 速率训练与稳定数据传输</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-003</div><div class="tc-desc">32GT/s 速率训练与稳定数据传输</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-004</div><div class="tc-desc">速率协商失败：两端支持速率不一致，按最高公共速率降级</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-005</div><div class="tc-desc">速率动态升级：Retrain 时从 8GT/s 升到 16GT/s</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-006</div><div class="tc-desc">Mainband 通道极性反转</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-007</div><div class="tc-desc">Mainband 通道 Lane 顺序反转</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-008</div><div class="tc-desc">Sideband 通道极性反转</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-009</div><div class="tc-desc">均衡训练：Tx 去加重 / Rx CTLE 系数协商</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-010</div><div class="tc-desc">眼图测试：BER 门限触发重训练</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-011</div><div class="tc-desc">Refclk 切换：时钟源切换不丢包</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-012</div><div class="tc-desc">POR 与 Cold Reset 流程</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-013</div><div class="tc-desc">Warm Reset：不重新上电的链路复位</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-014</div><div class="tc-desc">LP 模式进入/退出：电平切换与时序</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-015</div><div class="tc-desc">训练期间连续 Reset 打断</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-016</div><div class="tc-desc">抖动注入：高抖动环境下训练稳定性</div><div class="tc-priority"><span class="priority p-low">Low</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-017</div><div class="tc-desc">电压摆幅边界：最小/最大摆幅训练</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+                    <div class="table-row"><div class="tc-id">PH-018</div><div class="tc-desc">Sideband 独立训练失败后的 Fallback</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PHY</span></div></div>
+
+                    <!-- PL: Protocol Layer -->
+                    <div class="table-row"><div class="tc-id">PL-001</div><div class="tc-desc">PCIe Flit Mode 数据映射</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-002</div><div class="tc-desc">PCIe Non-Flit Mode 数据映射</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-003</div><div class="tc-desc">CXL.io 事务透传</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-004</div><div class="tc-desc">CXL.cache 请求/响应映射</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-005</div><div class="tc-desc">CXL.mem 读写与相干事务</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-006</div><div class="tc-desc">AXI4 写通道事务</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-007</div><div class="tc-desc">AXI4 读通道事务</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-008</div><div class="tc-desc">AXI4 乱序返回与 ID 路由</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-009</div><div class="tc-desc">CXS 包映射与拆包</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-010</div><div class="tc-desc">Virtual Channel 分配与优先级仲裁</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-011</div><div class="tc-desc">Traffic Class 映射（TC0-TC7）</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-012</div><div class="tc-desc">PCIe Ordering Rule：强序/宽松序</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-013</div><div class="tc-desc">AtomicOps 事务透传</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-014</div><div class="tc-desc">TLP 路由：ID、地址、隐式路由</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-015</div><div class="tc-desc">协议层错误映射到 UCIe 错误类型</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-016</div><div class="tc-desc">最大 payload 边界：MPS/MRSS 限制</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-017</div><div class="tc-desc">非法 TLP 格式检测与丢弃</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+                    <div class="table-row"><div class="tc-id">PL-018</div><div class="tc-desc">Completion Timeout 处理</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Protocol</span></div></div>
+
+                    <!-- PM: Power Management -->
+                    <div class="table-row"><div class="tc-id">PM-001</div><div class="tc-desc">L0s 进入与退出：无流量时自动降耗</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-002</div><div class="tc-desc">L1 进入与退出：软件触发与硬件自协商</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-003</div><div class="tc-desc">L2 进入与退出：最深低功耗状态</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-004</div><div class="tc-desc">PM 请求被拒绝：流量未停时拒绝 L1</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-005</div><div class="tc-desc">Retrain 触发：信号质量恶化后恢复</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-006</div><div class="tc-desc">动态速率切换：在 ACTIVE 中降速/升速</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-007</div><div class="tc-desc">Beacon 唤醒：L2 状态下被唤醒</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-008</div><div class="tc-desc">CLKREQ 握手与 CLK 门控</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-009</div><div class="tc-desc">低功耗状态期间收到 Sideband 消息</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+                    <div class="table-row"><div class="tc-id">PM-010</div><div class="tc-desc">PM 状态快速切换抖动：L0-L0s-L0-L1-L0</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">PM</span></div></div>
+
+                    <!-- ER: Error & Recovery -->
+                    <div class="table-row"><div class="tc-id">ER-001</div><div class="tc-desc">CRC 错误注入：单个包与连续包</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-002</div><div class="tc-desc">Parity 错误注入：Header/Data 位翻转</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-003</div><div class="tc-desc">Lane 错误注入：单 Lane 瞬时错误与持续错误</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-004</div><div class="tc-desc">Training 失败注入：参数不匹配触发重训练</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-005</div><div class="tc-desc">LinkDown 检测与 Recovery 状态机</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-006</div><div class="tc-desc">重传失败降级：Retry 超限后 LinkDown</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-007</div><div class="tc-desc">Non-Fatal 错误：仅记录中断不 LinkDown</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-008</div><div class="tc-desc">Fatal 错误：触发 LinkDown 与硬件复位</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-009</div><div class="tc-desc">错误风暴：连续错误下系统不卡死</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-010</div><div class="tc-desc">错误注入与正常流量交织</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-011</div><div class="tc-desc">Sideband 消息 CRC 错误</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-012</div><div class="tc-desc">Recovery 期间收到新事务</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-013</div><div class="tc-desc">错误寄存器快照与中断聚合</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-014</div><div class="tc-desc">Recovery 失败后的热复位</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+                    <div class="table-row"><div class="tc-id">ER-015</div><div class="tc-desc">错误抑制：短时间重复错误去抖</div><div class="tc-priority"><span class="priority p-low">Low</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Error</span></div></div>
+
+                    <!-- PERF: Performance -->
+                    <div class="table-row"><div class="tc-id">PERF-001</div><div class="tc-desc">峰值带宽：满 Lane 满负荷 32GT/s</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-002</div><div class="tc-desc">不同 payload 大小带宽效率（64B/256B/4KB）</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-003</div><div class="tc-desc">Round-trip Latency：最小/平均/最大延迟</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-004</div><div class="tc-desc">Credit 耗尽压力测试</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-005</div><div class="tc-desc">头阻塞（Head-of-Line Blocking）场景</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-006</div><div class="tc-desc">随机时序激励：延迟、间隙、反压随机化</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-007</div><div class="tc-desc">多 VC 并发争用仲裁</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-008</div><div class="tc-desc">降级 Lane 后带宽线性度验证</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-009</div><div class="tc-desc">长时间满负荷稳定性（ soak ）</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+                    <div class="table-row"><div class="tc-id">PERF-010</div><div class="tc-desc">吞吐量与 Retry 次数的关系</div><div class="tc-priority"><span class="priority p-low">Low</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">Perf</span></div></div>
+
+                    <!-- REG: Register / CSR -->
+                    <div class="table-row"><div class="tc-id">REG-001</div><div class="tc-desc">所有 CSR 寄存器读写默认值</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-002</div><div class="tc-desc">RW 寄存器位翻转测试</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-003</div><div class="tc-desc">RO 寄存器写保护</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-004</div><div class="tc-desc">WO / W1C / W1S 寄存器行为</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-005</div><div class="tc-desc">中断使能/状态/清除寄存器</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-006</div><div class="tc-desc">非法地址访问响应</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-007</div><div class="tc-desc">配置寄存器与链路状态联动</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-008</div><div class="tc-desc">链路状态寄存器实时更新</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-009</div><div class="tc-desc">寄存器配置后立即启动训练</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+                    <div class="table-row"><div class="tc-id">REG-010</div><div class="tc-desc">MSI/INTx 中断触发路径</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Register</span></div></div>
+
+                    <!-- SB: Sideband -->
+                    <div class="table-row"><div class="tc-id">SB-001</div><div class="tc-desc">Sideband 初始化握手</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Sideband</span></div></div>
+                    <div class="table-row"><div class="tc-id">SB-002</div><div class="tc-desc">参数请求消息：速率/宽度/模式协商</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Sideband</span></div></div>
+                    <div class="table-row"><div class="tc-id">SB-003</div><div class="tc-desc">链路状态通知：LinkUp / LinkDown</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Sideband</span></div></div>
+                    <div class="table-row"><div class="tc-id">SB-004</div><div class="tc-desc">PM 状态请求与响应</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Sideband</span></div></div>
+                    <div class="table-row"><div class="tc-id">SB-005</div><div class="tc-desc">错误消息广播</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Sideband</span></div></div>
+                    <div class="table-row"><div class="tc-id">SB-006</div><div class="tc-desc">Sideband 消息超时与重发</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Sideband</span></div></div>
+                    <div class="table-row"><div class="tc-id">SB-007</div><div class="tc-desc">Sideband 与 Mainband 并发</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">Sideband</span></div></div>
+                    <div class="table-row"><div class="tc-id">SB-008</div><div class="tc-desc">Sideband 消息乱序到达</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Random</span></div><div class="tc-category"><span class="category">Sideband</span></div></div>
+
+                    <!-- RST: Reset & Initialization -->
+                    <div class="table-row"><div class="tc-id">RST-001</div><div class="tc-desc">Cold Reset 后链路自动训练</div><div class="tc-priority"><span class="priority p-high">High</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Reset</span></div></div>
+                    <div class="table-row"><div class="tc-id">RST-002</div><div class="tc-desc">Warm Reset 后状态恢复</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Reset</span></div></div>
+                    <div class="table-row"><div class="tc-id">RST-003</div><div class="tc-desc">复位期间配置寄存器保持</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Reset</span></div></div>
+                    <div class="table-row"><div class="tc-id">RST-004</div><div class="tc-desc">训练过程中再次 Reset</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Reset</span></div></div>
+                    <div class="table-row"><div class="tc-id">RST-005</div><div class="tc-desc">多 Die 拓扑下独立/全局复位</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Reset</span></div></div>
+                    <div class="table-row"><div class="tc-id">RST-006</div><div class="tc-desc">复位释放时序违例：早释放/晚释放</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Reset</span></div></div>
+
+                    <!-- SEC: Security / Integrity -->
+                    <div class="table-row"><div class="tc-id">SEC-001</div><div class="tc-desc">数据完整性端到端校验</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Security</span></div></div>
+                    <div class="table-row"><div class="tc-id">SEC-002</div><div class="tc-desc">非法协议包过滤</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed+Random</span></div><div class="tc-category"><span class="category">Security</span></div></div>
+                    <div class="table-row"><div class="tc-id">SEC-003</div><div class="tc-desc">配置锁定寄存器（Lock bit）</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Security</span></div></div>
+                    <div class="table-row"><div class="tc-id">SEC-004</div><div class="tc-desc">特权寄存器访问保护</div><div class="tc-priority"><span class="priority p-medium">Medium</span></div><div class="tc-strategy"><span class="strategy">Directed</span></div><div class="tc-category"><span class="category">Security</span></div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="coverage">
+            <div class="section-header animate-on-scroll">
+                <h2>04. Coverage Plan</h2>
+                <p>多维度覆盖率收集策略，确保功能、接口与异常场景均被量化。</p>
+                <div class="section-line"></div>
+            </div>
+            <div class="coverage-grid">
+                <div class="coverage-card animate-on-scroll">
+                    <div class="coverage-ring">
+                        <svg width="140" height="140"><circle cx="70" cy="70" r="65" fill="none" stroke="#2a3555" stroke-width="10"/><circle cx="70" cy="70" r="65" fill="none" stroke="#3b82f6" stroke-width="10" class="fill" data-target="90"/></svg>
+                        <div class="coverage-value" data-target="90">0%</div>
+                    </div>
+                    <h3>代码覆盖率</h3>
+                    <p>Line / Toggle / Branch / FSM / Expression</p>
+                </div>
+                <div class="coverage-card animate-on-scroll">
+                    <div class="coverage-ring">
+                        <svg width="140" height="140"><circle cx="70" cy="70" r="65" fill="none" stroke="#2a3555" stroke-width="10"/><circle cx="70" cy="70" r="65" fill="none" stroke="#8b5cf6" stroke-width="10" class="fill" data-target="95"/></svg>
+                        <div class="coverage-value" data-target="95">0%</div>
+                    </div>
+                    <h3>功能覆盖率</h3>
+                    <p>Covergroup / Cross / Coverpoint</p>
+                </div>
+                <div class="coverage-card animate-on-scroll">
+                    <div class="coverage-ring">
+                        <svg width="140" height="140"><circle cx="70" cy="70" r="65" fill="none" stroke="#2a3555" stroke-width="10"/><circle cx="70" cy="70" r="65" fill="none" stroke="#06b6d4" stroke-width="10" class="fill" data-target="80"/></svg>
+                        <div class="coverage-value" data-target="80">0%</div>
+                    </div>
+                    <h3>断言覆盖率</h3>
+                    <p>SVA / Protocol Checkers / Scoreboard</p>
+                </div>
+                <div class="coverage-card animate-on-scroll">
+                    <div class="coverage-ring">
+                        <svg width="140" height="140"><circle cx="70" cy="70" r="65" fill="none" stroke="#2a3555" stroke-width="10"/><circle cx="70" cy="70" r="65" fill="none" stroke="#10b981" stroke-width="10" class="fill" data-target="85"/></svg>
+                        <div class="coverage-value" data-target="85">0%</div>
+                    </div>
+                    <h3>Corner 覆盖率</h3>
+                    <p>边界 / 异常 / 压力 / 异步场景</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="corners">
+            <div class="section-header animate-on-scroll">
+                <h2>05. Corner Case 矩阵</h2>
+                <p>按场景分类的典型边界与异常用例，确保验证不留死角。</p>
+                <div class="section-line"></div>
+            </div>
+            <div class="corner-grid">
+                <div class="corner-card animate-on-scroll">
+                    <h3>🔗 链路训练</h3>
+                    <ul>
+                        <li>训练中途 Reset/掉电</li>
+                        <li>两端参数不一致协商</li>
+                        <li>连续训练失败达到上限</li>
+                        <li>Sideband 训练失败 fallback</li>
+                        <li>极性/顺序反转组合</li>
+                    </ul>
+                </div>
+                <div class="corner-card animate-on-scroll">
+                    <h3>⚡ 物理层</h3>
+                    <ul>
+                        <li>最高速率下高抖动</li>
+                        <li>Lane 坏线位于边界位置</li>
+                        <li>Refclk 切换时数据冲刷</li>
+                        <li>LP/HS 快速切换</li>
+                        <li>电压摆幅极限</li>
+                    </ul>
+                </div>
+                <div class="corner-card animate-on-scroll">
+                    <h3>🔄 重传/流控</h3>
+                    <ul>
+                        <li>Replay Buffer 满+ACK 同时到达</li>
+                        <li>连续 NAK 风暴</li>
+                        <li>Credit 0 时仍收到数据</li>
+                        <li>ACK 与 NAK 乱序</li>
+                        <li>重传后原包与新包冲突</li>
+                    </ul>
+                </div>
+                <div class="corner-card animate-on-scroll">
+                    <h3>🌙 电源管理</h3>
+                    <ul>
+                        <li>PM 请求与数据并发</li>
+                        <li>退出 L2 时 Sideband 消息丢失</li>
+                        <li>Retrain 与低功耗状态竞争</li>
+                        <li>CLKREQ 抖动</li>
+                        <li>低功耗期间 CRC 错误</li>
+                    </ul>
+                </div>
+                <div class="corner-card animate-on-scroll">
+                    <h3>🧩 协议层</h3>
+                    <ul>
+                        <li>非法/畸形 TLP</li>
+                        <li>VC 与 TC 非法组合</li>
+                        <li>Completion Timeout 风暴</li>
+                        <li>AXI ID 冲突</li>
+                        <li>排序规则边界冲突</li>
+                    </ul>
+                </div>
+                <div class="corner-card animate-on-scroll">
+                    <h3>🧪 压力/异步</h3>
+                    <ul>
+                        <li>复位与时钟切换并发</li>
+                        <li>多 Die 独立复位</li>
+                        <li>异步 CDC 边界亚稳态</li>
+                        <li>配置寄存器与链路状态竞争</li>
+                        <li>长时间满负荷 soak</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>UCIe Controller Verification Plan · Generated by WorkBuddy · 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // Filter
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.dataset.filter;
+                document.querySelectorAll('.feature-card').forEach(card => {
+                    card.classList.toggle('hidden', filter !== 'all' && card.dataset.category !== filter);
+                });
+            });
+        });
+
+        // Scroll animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Coverage rings
+                    entry.target.querySelectorAll('.fill').forEach(circle => {
+                        const target = parseInt(circle.dataset.target);
+                        const offset = 440 - (440 * target / 100);
+                        circle.style.strokeDashoffset = offset;
+                    });
+                    entry.target.querySelectorAll('.coverage-value').forEach(val => {
+                        const target = parseInt(val.dataset.target);
+                        let current = 0;
+                        const timer = setInterval(() => {
+                            if (current >= target) { clearInterval(timer); return; }
+                            current++;
+                            val.textContent = current + '%';
+                        }, 20);
+                    });
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+        // Hero stats counter
+        document.querySelectorAll('.stat-number').forEach(stat => {
+            const target = parseInt(stat.dataset.target);
+            let current = 0;
+            const step = Math.max(1, Math.floor(target / 50));
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) { current = target; clearInterval(timer); }
+                stat.textContent = current + (stat.dataset.target === '95' ? '' : '');
+            }, 30);
+        });
+
+        // Navbar active
+        const sections = document.querySelectorAll('section[id]');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                if (scrollY >= section.offsetTop - 100) current = section.getAttribute('id');
+            });
+            document.querySelectorAll('.nav-links a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+            });
+        });
+    </script>
+</body>
+</html>
