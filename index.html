@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCIe Controller 验证计划 | Verification Plan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2035;
+            --bg-card-hover: #1f2847;
+            --border-color: #2a3555;
+            --border-accent: #3b82f6;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-pink: #ec4899;
+            --gradient-blue: linear-gradient(135deg, #1e40af, #3b82f6);
+            --gradient-purple: linear-gradient(135deg, #6d28d9, #8b5cf6);
+            --gradient-green: linear-gradient(135deg, #047857, #10b981);
+            --gradient-amber: linear-gradient(135deg, #b45309, #f59e0b);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+
+        .bg-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; overflow: hidden; pointer-events: none;
+        }
+        .bg-animation .orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            animation: float 20s infinite ease-in-out;
+        }
+        .bg-animation .orb:nth-child(1) {
+            width: 600px; height: 600px; background: #3b82f6;
+            top: -200px; left: -100px; animation-delay: 0s;
+        }
+        .bg-animation .orb:nth-child(2) {
+            width: 500px; height: 500px; background: #8b5cf6;
+            top: 50%; right: -150px; animation-delay: -7s;
+        }
+        .bg-animation .orb:nth-child(3) {
+            width: 400px; height: 400px; background: #06b6d4;
+            bottom: -100px; left: 30%; animation-delay: -14s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem; height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .navbar-brand {
+            display: flex; align-items: center; gap: 12px;
+            font-weight: 700; font-size: 1.1rem;
+        }
+        .navbar-brand .logo-icon {
+            width: 36px; height: 36px; background: var(--gradient-blue);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+        .navbar-links { display: flex; gap: 4px; }
+        .navbar-links a {
+            color: var(--text-secondary); text-decoration: none;
+            padding: 8px 14px; border-radius: 8px;
+            font-size: 0.82rem; font-weight: 500; transition: all 0.2s;
+        }
+        .navbar-links a:hover, .navbar-links a.active {
+            color: var(--text-primary); background: rgba(59, 130, 246, 0.15);
+        }
+
+        .main-content {
+            position: relative; z-index: 1; padding-top: 64px;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            text-align: center; padding: 2rem; position: relative;
+        }
+        .hero-content { max-width: 900px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 6px 16px; border-radius: 20px; font-size: 0.8rem;
+            color: var(--accent-blue); margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 700;
+            line-height: 1.1; margin-bottom: 1.5rem;
+            animation: fadeInUp 0.6s ease-out 0.1s both;
+        }
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.1rem; color: var(--text-secondary);
+            max-width: 650px; margin: 0 auto 2.5rem;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+        .hero-stats {
+            display: flex; justify-content: center; gap: 2.5rem;
+            animation: fadeInUp 0.6s ease-out 0.3s both;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat .num {
+            font-size: 2rem; font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-stat .label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sections */
+        .section {
+            padding: 5rem 2rem; max-width: 1300px; margin: 0 auto;
+        }
+        .section-header {
+            text-align: center; margin-bottom: 3.5rem;
+        }
+        .section-header .tag {
+            display: inline-block; font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 2px;
+            color: var(--accent-cyan); margin-bottom: 1rem;
+        }
+        .section-header h2 {
+            font-size: clamp(1.6rem, 3.5vw, 2.5rem); font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .section-header p {
+            color: var(--text-secondary); font-size: 1rem;
+            max-width: 600px; margin: 0 auto;
+        }
+
+        /* Architecture Diagram */
+        .arch-diagram {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
+            position: relative; overflow: hidden;
+        }
+        .arch-diagram::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+        }
+        .arch-layers { display: flex; flex-direction: column; gap: 0; position: relative; }
+        .arch-layer {
+            border-radius: 12px; padding: 1rem 1.2rem; position: relative;
+            transition: all 0.3s; cursor: pointer; margin-bottom: 2px;
+        }
+        .arch-layer:hover { transform: translateX(8px); }
+        .arch-layer.layer-protocol {
+            background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.03));
+            border: 1px solid rgba(16,185,129,0.15);
+        }
+        .arch-layer.layer-d2d {
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(59,130,246,0.03));
+            border: 1px solid rgba(59,130,246,0.15);
+        }
+        .arch-layer.layer-phy {
+            background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(139,92,246,0.03));
+            border: 1px solid rgba(139,92,246,0.15);
+        }
+        .arch-layer .layer-title {
+            font-weight: 600; font-size: 0.88rem; margin-bottom: 5px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .arch-layer .layer-title .icon {
+            width: 26px; height: 26px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+        }
+        .layer-protocol .icon { background: rgba(16,185,129,0.15); }
+        .layer-d2d .icon { background: rgba(59,130,246,0.15); }
+        .layer-phy .icon { background: rgba(139,92,246,0.15); }
+        .arch-layer .layer-desc {
+            font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;
+        }
+        .arch-layer .layer-items {
+            display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
+        }
+        .arch-layer .layer-item {
+            font-size: 0.68rem; padding: 2px 8px; border-radius: 10px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+            color: var(--text-secondary);
+        }
+        .connector-arrow {
+            text-align: center; color: var(--text-muted);
+            font-size: 1rem; padding: 1px 0; letter-spacing: 3px;
+        }
+
+        /* Feature Cards */
+        .feature-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.2rem;
+        }
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 1.5rem; transition: all 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 2px; background: var(--card-accent, var(--accent-blue));
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-card:hover {
+            border-color: rgba(59, 130, 246, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+        }
+        .feature-card .card-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 0.8rem;
+        }
+        .feature-card .card-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .feature-card .card-title {
+            font-weight: 600; font-size: 0.95rem;
+        }
+        .feature-card .card-subtitle {
+            font-size: 0.72rem; color: var(--text-muted);
+        }
+        .feature-card .card-body {
+            font-size: 0.82rem; color: var(--text-secondary);
+            line-height: 1.55; margin-bottom: 0.8rem;
+        }
+        .feature-card .card-tags {
+            display: flex; flex-wrap: wrap; gap: 5px;
+        }
+        .feature-card .tag-item {
+            font-size: 0.68rem; padding: 2px 8px; border-radius: 10px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex; justify-content: center; flex-wrap: wrap;
+            gap: 6px; margin-bottom: 2rem;
+        }
+        .filter-tab {
+            padding: 7px 16px; border-radius: 18px; font-size: 0.82rem;
+            font-weight: 500; cursor: pointer; transition: all 0.2s;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .filter-tab:hover { border-color: var(--accent-blue); color: var(--text-primary); }
+        .filter-tab.active {
+            background: var(--accent-blue); border-color: var(--accent-blue); color: white;
+        }
+
+        /* Testplan Tables */
+        .testplan-section { margin-bottom: 2.5rem; }
+        .testplan-section-title {
+            font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .testplan-table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; font-size: 0.82rem;
+        }
+        .testplan-table thead th {
+            background: rgba(59, 130, 246, 0.08);
+            padding: 10px 14px; text-align: left;
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--accent-blue); border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .testplan-table tbody td {
+            padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,0.02);
+            vertical-align: top; font-size: 0.82rem;
+        }
+        .testplan-table tbody tr:hover { background: rgba(59, 130, 246, 0.04); }
+        .testplan-table tbody tr:last-child td { border-bottom: none; }
+        .testplan-table .tc-id { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--accent-cyan); }
+        .priority-high { color: var(--accent-red); font-weight: 600; font-size: 0.78rem; }
+        .priority-medium { color: var(--accent-amber); font-weight: 600; font-size: 0.78rem; }
+        .priority-low { color: var(--accent-green); font-weight: 600; font-size: 0.78rem; }
+        .strategy-tag {
+            display: inline-block; padding: 1px 8px; border-radius: 8px;
+            font-size: 0.72rem; background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+        }
+
+        /* Corner Cases Section */
+        .corner-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+        .corner-card {
+            background: var(--bg-card); border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 14px; padding: 1.5rem; transition: all 0.3s;
+        }
+        .corner-card:hover {
+            border-color: rgba(239,68,68,0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(239,68,68,0.08);
+        }
+        .corner-card .corner-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(239,68,68,0.12); display: flex;
+            align-items: center; justify-content: center; font-size: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        .corner-card .corner-title {
+            font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;
+        }
+        .corner-card .corner-desc {
+            font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;
+        }
+        .corner-card .corner-tags {
+            margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;
+        }
+        .corner-card .corner-tag {
+            font-size: 0.65rem; padding: 2px 7px; border-radius: 8px;
+            background: rgba(239,68,68,0.1); color: var(--accent-red);
+            border: 1px solid rgba(239,68,68,0.15);
+        }
+
+        /* Coverage */
+        .coverage-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+        }
+        .coverage-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 1.5rem; text-align: center;
+            transition: all 0.3s;
+        }
+        .coverage-card:hover { transform: scale(1.02); border-color: rgba(59,130,246,0.25); }
+        .coverage-card .cov-circle {
+            width: 90px; height: 90px; margin: 0 auto 0.8rem; position: relative;
+        }
+        .coverage-card .cov-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .coverage-card .cov-circle .track {
+            fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 7;
+        }
+        .coverage-card .cov-circle .fill {
+            fill: none; stroke-width: 7; stroke-linecap: round;
+            transition: stroke-dashoffset 1.2s ease-out;
+        }
+        .coverage-card .cov-value {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.3rem; font-weight: 700;
+        }
+        .coverage-card .cov-label { font-size: 0.82rem; font-weight: 600; margin-bottom: 3px; }
+        .coverage-card .cov-desc { font-size: 0.72rem; color: var(--text-muted); }
+
+        /* Verification Strategy */
+        .strategy-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.2rem;
+        }
+        .strategy-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 1.5rem;
+        }
+        .strategy-card .strategy-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; margin-bottom: 0.8rem;
+        }
+        .strategy-card .strategy-title {
+            font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;
+        }
+        .strategy-card .strategy-desc {
+            font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;
+        }
+        .strategy-card .strategy-list {
+            margin-top: 0.8rem; padding-left: 1rem;
+            font-size: 0.78rem; color: var(--text-secondary);
+        }
+        .strategy-card .strategy-list li { padding: 2px 0; }
+
+        /* Collapsible table */
+        .table-toggle { cursor: pointer; user-select: none; }
+        .table-toggle:hover { text-decoration: underline; }
+        .table-container {
+            max-height: 600px; overflow-y: auto; border-radius: 12px;
+            scrollbar-width: thin; scrollbar-color: #3b82f6 var(--bg-card);
+        }
+        .table-container::-webkit-scrollbar { width: 5px; }
+        .table-container::-webkit-scrollbar-track { background: var(--bg-card); }
+        .table-container::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+
+        /* Footer */
+        .footer {
+            text-align: center; padding: 2.5rem 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted); font-size: 0.85rem;
+        }
+        .footer a { color: var(--accent-blue); text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-links { display: none; }
+            .hero-stats { flex-direction: column; gap: 1.2rem; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .section { padding: 3rem 1rem; }
+            .testplan-table { font-size: 0.75rem; }
+            .testplan-table thead th, .testplan-table tbody td { padding: 8px 10px; }
+        }
+
+        /* Scroll animations */
+        .animate-on-scroll {
+            opacity: 0; transform: translateY(25px);
+            transition: all 0.5s ease-out;
+        }
+        .animate-on-scroll.visible {
+            opacity: 1; transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="logo-icon">🔗</div>
+            <span>UCIe Verification</span>
+        </div>
+        <div class="navbar-links">
+            <a href="#overview">概览</a>
+            <a href="#architecture">架构</a>
+            <a href="#features">功能点</a>
+            <a href="#testplan">测试计划</a>
+            <a href="#corner">Corner Cases</a>
+            <a href="#strategy">验证策略</a>
+            <a href="#coverage">覆盖率</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <!-- Hero -->
+        <section class="hero" id="overview">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span>📡</span> Universal Chiplet Interconnect Express · 全面验证计划
+                </div>
+                <h1>
+                    UCIe Controller<br>
+                    <span class="gradient-text">验证计划 v2.0</span>
+                </h1>
+                <p>
+                    面向资深数字验证工程师的 UCIe Controller 全面验证方案，<br>
+                    涵盖 <strong>159+</strong> 详细测试用例，覆盖所有功能点、异常场景与 Corner Case，<br>
+                    助力高质量芯片验证交付。
+                </p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="num" id="stat-features">0</div>
+                        <div class="label">功能验证点</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num" id="stat-testcases">0</div>
+                        <div class="label">测试用例</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num" id="stat-high">0</div>
+                        <div class="label">高优先级</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num" id="stat-layers">0</div>
+                        <div class="label">验证模块</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture -->
+        <section class="section" id="architecture">
+            <div class="section-header animate-on-scroll">
+                <div class="tag">Architecture</div>
+                <h2>UCIe 协议栈架构</h2>
+                <p>理解 UCIe 的分层架构是制定验证计划的基础，每层都有独立的验证重点</p>
+            </div>
+            <div class="arch-diagram animate-on-scroll">
+                <div class="arch-layers">
+                    <div class="arch-layer layer-protocol">
+                        <div class="layer-title"><span class="icon">📦</span> Protocol Layer（协议层）</div>
+                        <div class="layer-desc">支持多种协议映射，包括 PCIe、CXL、AXI 和 CXS，负责协议特定事务的处理、封装/解封装及排序规则。</div>
+                        <div class="layer-items">
+                            <span class="layer-item">PCIe TLP</span>
+                            <span class="layer-item">CXL.io</span>
+                            <span class="layer-item">CXL.mem</span>
+                            <span class="layer-item">CXL.cache</span>
+                            <span class="layer-item">AXI4/AXI5</span>
+                            <span class="layer-item">ACE Coherency</span>
+                            <span class="layer-item">CXS</span>
+                            <span class="layer-item">Multi-Protocol</span>
+                        </div>
+                    </div>
+                    <div class="connector-arrow">⬇ &nbsp; D2D Adapter &nbsp; ⬇</div>
+                    <div class="arch-layer layer-d2d">
+                        <div class="layer-title"><span class="icon">🔄</span> D2D Adapter Layer（Die-to-Die 适配层）</div>
+                        <div class="layer-desc">核心链路管理层，负责链路初始化、参数协商、基于 Credit 的流控、CRC/重传及错误恢复机制。是 UCIe 最复杂的部分。</div>
+                        <div class="layer-items">
+                            <span class="layer-item">Link Training</span>
+                            <span class="layer-item">Param Exchange</span>
+                            <span class="layer-item">Flow Control</span>
+                            <span class="layer-item">CRC & Retry</span>
+                            <span class="layer-item">Error Recovery</span>
+                            <span class="layer-item">Sideband MSG</span>
+                            <span class="layer-item">Lane Repair</span>
+                            <span class="layer-item">FLIT Format</span>
+                        </div>
+                    </div>
+                    <div class="connector-arrow">⬇ &nbsp; Physical Interface &nbsp; ⬇</div>
+                    <div class="arch-layer layer-phy">
+                        <div class="layer-title"><span class="icon">⚡</span> Physical Layer（物理层 + PHY）</div>
+                        <div class="layer-desc">基于 PCIe 电气规范，支持多数据速率（8/16/32 GT/s），负责链路训练、均衡、Lane 操作及电气特性验证。</div>
+                        <div class="layer-items">
+                            <span class="layer-item">8/16/32 GT/s</span>
+                            <span class="layer-item">Link Training</span>
+                            <span class="layer-item">EQ Phase 0-3</span>
+                            <span class="layer-item">Lane Reversal</span>
+                            <span class="layer-item">Polarity Invert</span>
+                            <span class="layer-item">Width Negotiation</span>
+                            <span class="layer-item">Deskew</span>
+                            <span class="layer-item">BER Testing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature List -->
+        <section class="section" id="features">
+            <div class="section-header animate-on-scroll">
+                <div class="tag">Feature List</div>
+                <h2>全面功能验证点</h2>
+                <p>系统梳理 UCIe Controller 所有需要验证的功能特性，按模块分类展示</p>
+            </div>
+            <div class="filter-tabs animate-on-scroll">
+                <div class="filter-tab active" onclick="filterFeatures('all', this)">全部</div>
+                <div class="filter-tab" onclick="filterFeatures('d2d', this)">D2D 适配层</div>
+                <div class="filter-tab" onclick="filterFeatures('phy', this)">物理层</div>
+                <div class="filter-tab" onclick="filterFeatures('protocol', this)">协议层</div>
+                <div class="filter-tab" onclick="filterFeatures('pm', this)">电源管理</div>
+                <div class="filter-tab" onclick="filterFeatures('error', this)">错误恢复</div>
+                <div class="filter-tab" onclick="filterFeatures('perf', this)">性能验证</div>
+                <div class="filter-tab" onclick="filterFeatures('csr', this)">寄存器</div>
+                <div class="filter-tab" onclick="filterFeatures('reset', this)">复位</div>
+            </div>
+            <div class="feature-grid" id="feature-grid">
+    
+                <div class="feature-card animate-on-scroll" data-category="d2d">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">🔗</div>
+                        <div>
+                            <div class="card-title">链路初始化与训练</div>
+                            <div class="card-subtitle">Link Init & Training</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 D2D 链路从 Reset 到 Active 的完整状态机转换，含参数交换、宽度协商、Lane 反转等所有训练步骤。</div>
+                    <div class="card-tags"><span class="tag-item">State Machine</span><span class="tag-item">Param Exchange</span><span class="tag-item">Width Negotiation</span><span class="tag-item">Lane Reversal</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="d2d">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">📊</div>
+                        <div>
+                            <div class="card-title">基于 Credit 的流控</div>
+                            <div class="card-subtitle">Credit-Based Flow Control</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证发送端与接收端之间 Credit 管理逻辑，包括初始化、更新、耗尽及反压场景，确保无死锁与丢包。</div>
+                    <div class="card-tags"><span class="tag-item">Credit Init</span><span class="tag-item">Backpressure</span><span class="tag-item">Deadlock Free</span><span class="tag-item">Multi-VC</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="d2d">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">🔁</div>
+                        <div>
+                            <div class="card-title">CRC 与重传机制</div>
+                            <div class="card-subtitle">CRC & Retry Mechanism</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证数据链路层的 CRC 计算、错误检测、重传请求及重传执行逻辑，覆盖单包/多包重传、超时等场景。</div>
+                    <div class="card-tags"><span class="tag-item">CRC Calculation</span><span class="tag-item">Retry Request</span><span class="tag-item">Timeout Retry</span><span class="tag-item">Seq Num Wrap</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="d2d">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">📨</div>
+                        <div>
+                            <div class="card-title">边带消息处理</div>
+                            <div class="card-subtitle">Sideband Message Handling</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证边带通道的消息格式、编码解码、消息类型识别及响应逻辑，包括 PME、L1/L2 请求等。</div>
+                    <div class="card-tags"><span class="tag-item">Msg Format</span><span class="tag-item">PME Message</span><span class="tag-item">L1/L2 Request</span><span class="tag-item">Queue Overflow</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="d2d">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">🔧</div>
+                        <div>
+                            <div class="card-title">Lane 修复机制</div>
+                            <div class="card-subtitle">Lane Repair Mechanism</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 UCIe 冗余 Lane 的切换逻辑，当主 Lane 失效时自动切换到备用 Lane，提高良率。</div>
+                    <div class="card-tags"><span class="tag-item">Redundant Lane</span><span class="tag-item">Repair Logic</span><span class="tag-item">Yield Improvement</span><span class="tag-item">BISR</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="d2d">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">📦</div>
+                        <div>
+                            <div class="card-title">FLIT 格式处理</div>
+                            <div class="card-subtitle">FLIT Format & Handling</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 FLIT 的组装/拆解、头部字段解析、多包拼接等逻辑，确保与 UCIe 规范一致。</div>
+                    <div class="card-tags"><span class="tag-item">FLIT Assembly</span><span class="tag-item">FLIT Parse</span><span class="tag-item">Multi-Packet</span><span class="tag-item">Header Fields</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="phy">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">⚡</div>
+                        <div>
+                            <div class="card-title">链路训练与均衡</div>
+                            <div class="card-subtitle">Link Training & Equalization</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证物理层 TS1/TS2 有序集检测、Bit/Symbol Lock、Lane 对齐及均衡训练（EQ Phase 0-3）。</div>
+                    <div class="card-tags"><span class="tag-item">TS1/TS2 Detect</span><span class="tag-item">Bit/Symbol Lock</span><span class="tag-item">EQ Training</span><span class="tag-item">Preset Support</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="phy">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">🔀</div>
+                        <div>
+                            <div class="card-title">Lane 反转与极性</div>
+                            <div class="card-subtitle">Lane Reversal & Polarity</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 Lane 序号反转检测和修正逻辑，以及数据极性自动检测与反转功能。</div>
+                    <div class="card-tags"><span class="tag-item">Lane Reverse</span><span class="tag-item">Polarity Detect</span><span class="tag-item">Auto Correction</span><span class="tag-item">Training</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="phy">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">📈</div>
+                        <div>
+                            <div class="card-title">数据速率协商</div>
+                            <div class="card-subtitle">Data Rate Negotiation</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 8/16/32 GT/s 多速率协商与动态切换，包括速率切换时的训练序列及稳定性。</div>
+                    <div class="card-tags"><span class="tag-item">8 GT/s</span><span class="tag-item">16 GT/s</span><span class="tag-item">32 GT/s</span><span class="tag-item">Dynamic Switch</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="phy">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">📐</div>
+                        <div>
+                            <div class="card-title">Lane 对齐与 Deskew</div>
+                            <div class="card-subtitle">Lane Alignment & Deskew</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证多 Lane 场景下 Symbol 对齐及 Deskew 缓冲区正确处理各 Lane 到达时间差。</div>
+                    <div class="card-tags"><span class="tag-item">Symbol Align</span><span class="tag-item">Deskew Buffer</span><span class="tag-item">Multi-Lane</span><span class="tag-item">Timing Margin</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="phy">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">🔍</div>
+                        <div>
+                            <div class="card-title">BER 与信号质量</div>
+                            <div class="card-subtitle">BER & Signal Quality</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证比特错误率测量及信号质量评估，包括眼图余量测试（仿真级）。</div>
+                    <div class="card-tags"><span class="tag-item">BER Measurement</span><span class="tag-item">Eye Margin</span><span class="tag-item">Signal Quality</span><span class="tag-item">Stress Pattern</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="protocol">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">📦</div>
+                        <div>
+                            <div class="card-title">PCIe 协议支持</div>
+                            <div class="card-subtitle">PCIe Protocol Support</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 PCIe TLP 封装/解封装、Ordering 规则、流量分类、MPS、Tag 管理及 QoS 处理。</div>
+                    <div class="card-tags"><span class="tag-item">TLP Encapsulation</span><span class="tag-item">Ordering Rules</span><span class="tag-item">Flow Control</span><span class="tag-item">Tag Mgmt</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="protocol">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">🧠</div>
+                        <div>
+                            <div class="card-title">CXL 协议支持</div>
+                            <div class="card-subtitle">CXL Protocol Support</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 CXL.io/.mem/.cache 三种协议类型的支持，包括缓存一致性维护、内存访问语义。</div>
+                    <div class="card-tags"><span class="tag-item">CXL.io</span><span class="tag-item">CXL.mem</span><span class="tag-item">CXL.cache</span><span class="tag-item">Coherency</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="protocol">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">🔄</div>
+                        <div>
+                            <div class="card-title">AXI/ACE 协议支持</div>
+                            <div class="card-subtitle">AXI/ACE Protocol Support</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 AXI4/AXI5 及 ACE 协议的映射，包括读写事务、乱序响应、缓存一致性扩展。</div>
+                    <div class="card-tags"><span class="tag-item">AXI4/AXI5</span><span class="tag-item">Out-of-Order</span><span class="tag-item">ACE Coherency</span><span class="tag-item">4KB Boundary</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="protocol">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">🔀</div>
+                        <div>
+                            <div class="card-title">多协议并发传输</div>
+                            <div class="card-subtitle">Multi-Protocol Concurrent</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 PCIe + CXL 等多种协议同时传输时的隔离性、仲裁机制及带宽分配。</div>
+                    <div class="card-tags"><span class="tag-item">Protocol Arbitration</span><span class="tag-item">Isolation</span><span class="tag-item">Bandwidth Share</span><span class="tag-item">VC Mapping</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="pm">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🔋</div>
+                        <div>
+                            <div class="card-title">L1 低功耗状态</div>
+                            <div class="card-subtitle">L1 Low Power State</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 L1 状态的进入/退出流程，包括 L1 请求握手、Timer 管理、唤醒检测及快速唤醒。</div>
+                    <div class="card-tags"><span class="tag-item">L1 Entry</span><span class="tag-item">L1 Exit</span><span class="tag-item">Wakeup Detect</span><span class="tag-item">Quick Wake</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="pm">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🔌</div>
+                        <div>
+                            <div class="card-title">L2 低功耗状态</div>
+                            <div class="card-subtitle">L2 Low Power State</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 L2 状态的完整进入/退出流程，包括 Main Power 关断、Sideband 唤醒及完整重训练。</div>
+                    <div class="card-tags"><span class="tag-item">L2 Entry</span><span class="tag-item">Sideband Wake</span><span class="tag-item">Full Retrain</span><span class="tag-item">State Save</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="pm">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">⏰</div>
+                        <div>
+                            <div class="card-title">时钟与电源门控</div>
+                            <div class="card-subtitle">Clock & Power Gating</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证细粒度时钟门控和电源门控逻辑，包括空闲检测、门控进入/退出及状态保持功能。</div>
+                    <div class="card-tags"><span class="tag-item">Clock Gating</span><span class="tag-item">Power Gating</span><span class="tag-item">State Retention</span><span class="tag-item">Wakeup Latency</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="pm">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🌡️</div>
+                        <div>
+                            <div class="card-title">DVFS 动态调频</div>
+                            <div class="card-subtitle">Dynamic Voltage & Frequency Scaling</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证运行中动态调整电压和频率时链路的稳定性，及电源状态与性能的平衡。</div>
+                    <div class="card-tags"><span class="tag-item">DVFS</span><span class="tag-item">Voltage Change</span><span class="tag-item">Freq Change</span><span class="tag-item">Stability</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="error">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;">⚠️</div>
+                        <div>
+                            <div class="card-title">CRC 错误注入检测</div>
+                            <div class="card-subtitle">CRC Error Injection & Detect</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证各种场景下注入 CRC 错误后，接收端能正确检测并触发重传，含单/多比特及突发错误。</div>
+                    <div class="card-tags"><span class="tag-item">Single Bit</span><span class="tag-item">Multi Bit</span><span class="tag-item">Burst Error</span><span class="tag-item">Error Rate</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="error">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;">🔧</div>
+                        <div>
+                            <div class="card-title">链路恢复训练</div>
+                            <div class="card-subtitle">Link Recovery Training</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证从错误状态触发的恢复训练流程，包括 Recovery 状态机、TS 序列重发及稳定后返回。</div>
+                    <div class="card-tags"><span class="tag-item">Recovery State</span><span class="tag-item">TS Retrain</span><span class="tag-item">Stable Detect</span><span class="tag-item">Nested Error</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="error">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;">📉</div>
+                        <div>
+                            <div class="card-title">Lane 降级与冗余</div>
+                            <div class="card-subtitle">Lane De-grade & Redundancy</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 Lane 失效检测、自动降级（x16→x8→x4）及冗余 Lane 切换功能。</div>
+                    <div class="card-tags"><span class="tag-item">Lane Fail Detect</span><span class="tag-item">Width De-grade</span><span class="tag-item">Redundant Lane</span><span class="tag-item">Auto Recovery</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="error">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;">🔥</div>
+                        <div>
+                            <div class="card-title">压力与错误并发</div>
+                            <div class="card-subtitle">Stress & Concurrent Errors</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证在流量压力、低功耗、错误注入等多种场景同时发生时的链路稳定性。</div>
+                    <div class="card-tags"><span class="tag-item">Stress + Error</span><span class="tag-item">Power + Error</span><span class="tag-item">Multi-Lane Fail</span><span class="tag-item">Long Duration</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="perf">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4;">📈</div>
+                        <div>
+                            <div class="card-title">带宽与吞吐量</div>
+                            <div class="card-subtitle">Bandwidth & Throughput</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证在各种包长、协议类型及反压条件下的实际带宽，确保达到 UCIe 规范定义的带宽目标。</div>
+                    <div class="card-tags"><span class="tag-item">Max Throughput</span><span class="tag-item">Packet Size</span><span class="tag-item">Encoding Overhead</span><span class="tag-item">Multi-Rate</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="perf">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4;">⏱️</div>
+                        <div>
+                            <div class="card-title">延迟测量与分布</div>
+                            <div class="card-subtitle">Latency Measurement & Distribution</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证端到端延迟，含不同负载条件下的延迟分布（P50/P99/P999）及低功耗唤醒延迟。</div>
+                    <div class="card-tags"><span class="tag-item">End-to-End</span><span class="tag-item">P99 Latency</span><span class="tag-item">Load Impact</span><span class="tag-item">Wake Latency</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="perf">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4;">🔀</div>
+                        <div>
+                            <div class="card-title">反压与流控压力</div>
+                            <div class="card-subtitle">Backpressure & FC Stress</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证在极端反压场景下的发送端行为，确保无死锁且能在反压解除后正确恢复。</div>
+                    <div class="card-tags"><span class="tag-item">Heavy Backpressure</span><span class="tag-item">No Deadlock</span><span class="tag-item">Recovery Check</span><span class="tag-item">Credit Starve</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="perf">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4;">🏃</div>
+                        <div>
+                            <div class="card-title">持续满带宽运行</div>
+                            <div class="card-subtitle">Continuous Full Bandwidth</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证长时间（数亿周期）满带宽传输场景下的性能稳定性，无死锁或吞吐量降级。</div>
+                    <div class="card-tags"><span class="tag-item">Sustained Throughput</span><span class="tag-item">No Deadlock</span><span class="tag-item">Performance Degrade</span><span class="tag-item">Soak Test</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="csr">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(156,163,175,0.15);color:#9ca3af;">📋</div>
+                        <div>
+                            <div class="card-title">寄存器编程</div>
+                            <div class="card-subtitle">Register Programming & CSR</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证所有 CSRs 的可编程性、默认值、只读字段保护及复位行为。</div>
+                    <div class="card-tags"><span class="tag-item">Register Default</span><span class="tag-item">RW Fields</span><span class="tag-item">RO Protection</span><span class="tag-item">Reset Behavior</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="csr">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(156,163,175,0.15);color:#9ca3af;">🔔</div>
+                        <div>
+                            <div class="card-title">中断处理机制</div>
+                            <div class="card-subtitle">Interrupt Handling</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证链路相关中断（错误、PM 事件等）的正确触发、状态更新及清除机制。</div>
+                    <div class="card-tags"><span class="tag-item">Intr Assert</span><span class="tag-item">Intr Clear</span><span class="tag-item">Intr Mask</span><span class="tag-item">ISR Check</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="reset">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(236,72,153,0.15);color:#ec4899;">🔄</div>
+                        <div>
+                            <div class="card-title">复位与初始化</div>
+                            <div class="card-subtitle">Reset & Initialization</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证 Cold/Warm/Hot Reset 的完整流程，包括状态机复位、配置保留/清除及重训练。</div>
+                    <div class="card-tags"><span class="tag-item">Cold Reset</span><span class="tag-item">Warm Reset</span><span class="tag-item">Hot Reset</span><span class="tag-item">Config Retain</span></div>
+                </div>
+        
+                <div class="feature-card animate-on-scroll" data-category="reset">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:rgba(236,72,153,0.15);color:#ec4899;">⚡</div>
+                        <div>
+                            <div class="card-title">频繁复位压力</div>
+                            <div class="card-subtitle">Frequent Reset Stress</div>
+                        </div>
+                    </div>
+                    <div class="card-body">验证短时间内多次复位场景，确保状态机无卡死且能正确恢复。</div>
+                    <div class="card-tags"><span class="tag-item">Back-to-Back Reset</span><span class="tag-item">State Machine</span><span class="tag-item">No Hang</span><span class="tag-item">Recovery</span></div>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- Test Plan -->
+        <section class="section" id="testplan">
+            <div class="section-header animate-on-scroll">
+                <div class="tag">Test Plan</div>
+                <h2>详细测试计划（159 测试用例）</h2>
+                <p>按验证模块分类的详细测试用例列表，包含优先级与验证策略</p>
+            </div>
+    
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#3b82f6;">
+                    <span style="color:#3b82f6;">●</span> D2D 适配层测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖链路训练、流控、CRC/重传、边带消息等所有 D2D 适配层验证点</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">DP-001</td>
+                            <td>冷复位初始化</td>
+                            <td>Cold Reset 后链路正确进入初始化，状态机从 Reset→Detect→Polling→Config→Active</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-002</td>
+                            <td>热复位初始化</td>
+                            <td>Warm Reset 后保留部分配置，快速重新训练链路</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-003</td>
+                            <td>热插拔复位</td>
+                            <td>Hot Reset 触发对端同时复位，验证对称复位行为</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-004</td>
+                            <td>参数交换完整性</td>
+                            <td>验证双方参数正确交换：协议类型、Lane宽度、FLIT大小、Credit配置</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-005</td>
+                            <td>参数不兼容处理</td>
+                            <td>一端仅支持 PCIe、另一端仅支持 CXL，验证降级或报错处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-006</td>
+                            <td>参数交换CRC错误</td>
+                            <td>参数交换期间注入 CRC 错误，验证重传或重新交换</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-007</td>
+                            <td>宽度协商 x16→x8</td>
+                            <td>验证 x16 协商降级到 x8 的完整流程</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-008</td>
+                            <td>宽度协商 x16→x4</td>
+                            <td>验证 x16 协商降级到 x4 的完整流程</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-009</td>
+                            <td>宽度协商失败重试</td>
+                            <td>协商失败（Lane 质量不足）后自动重试更低宽度</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-010</td>
+                            <td>Lane 反转检测与修正</td>
+                            <td>Lane 序号反转时正确检测并修正数据传输顺序</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-011</td>
+                            <td>Lane 反转 + 宽度降级组合</td>
+                            <td>Lane 反转同时存在宽度降级，验证正确性</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-012</td>
+                            <td>训练中远端复位</td>
+                            <td>链路训练过程中对端触发复位，验证本端状态机正确响应</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-013</td>
+                            <td>训练超时处理</td>
+                            <td>训练超过规定时间未完成，触发超时并处理（重试或报错）</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-014</td>
+                            <td>Credit 池初始化</td>
+                            <td>上电后 Credit 池正确初始化，各 VC 的 Credit 数量符合配置</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-015</td>
+                            <td>Credit 消耗与更新</td>
+                            <td>发送包后正确减少 Credit，接收对端 Credit Return 后正确恢复</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-016</td>
+                            <td>Credit 完全耗尽</td>
+                            <td>Credit 耗尽时发送端立即停止发送，不溢出</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-017</td>
+                            <td>Credit 恢复发送</td>
+                            <td>Credit 恢复后发送端正确继续发送pending数据</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-018</td>
+                            <td>Credit 溢出检查</td>
+                            <td>对端返回过多 Credit（超初始值），检查是否会溢出</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-019</td>
+                            <td>Credit 不足返回</td>
+                            <td>对端返回 Credit 数量小于已消耗（异常），检查处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-020</td>
+                            <td>多 VC 公平调度</td>
+                            <td>多个虚拟通道同时存在，验证 Credit 调度公平性，避免饥饿</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-021</td>
+                            <td>Credit 更新包丢失</td>
+                            <td>Credit Return 包在链路上丢失，验证超时后重新返回机制</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-022</td>
+                            <td>极端反压场景</td>
+                            <td>接收端长时间不返回 Credit，验证发送端无死锁</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-023</td>
+                            <td>CRC 计算正确性</td>
+                            <td>各种包长（最小到最大 FLIT）的 CRC 计算与 UCIe 规范一致</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-024</td>
+                            <td>单包 CRC 错误重传</td>
+                            <td>注入 1 个包的 CRC 错误，验证 NACK + 重传</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-025</td>
+                            <td>连续多包重传</td>
+                            <td>注入连续 N 个包 CRC 错误，验证批量重传正确性</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-026</td>
+                            <td>重传包再次错误</td>
+                            <td>重传的包再次 CRC 错误，验证多次重传上限与处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-027</td>
+                            <td>重传超时触发 Recovery</td>
+                            <td>重传超时次数超过阈值，触发链路 Recovery</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-028</td>
+                            <td>序列号回绕</td>
+                            <td>序列号达到最大值后回绕到 0，验证无歧义</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-029</td>
+                            <td>重传缓冲区溢出</td>
+                            <td>大量包需重传导致缓冲区满，验证处理策略（丢包/反压）</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-030</td>
+                            <td>ACK/NACK 丢失</td>
+                            <td>ACK 或 NACK 包在链路上丢失，验证超时重传机制</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-031</td>
+                            <td>CRC 错误率压力测试</td>
+                            <td>以不同错误率（1%、5%、10%）注入 CRC 错误，验证链路稳定性</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-032</td>
+                            <td>边带消息格式验证</td>
+                            <td>所有边带消息类型的格式正确编解码（PME、L1 Req/Ack、L2 Req/Ack）</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-033</td>
+                            <td>PME 消息处理</td>
+                            <td>电源管理事件消息正确传递与响应</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-034</td>
+                            <td>边带消息在训练中</td>
+                            <td>链路训练期间收到边带消息，验证处理或排队机制</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-035</td>
+                            <td>边带消息队列溢出</td>
+                            <td>大量边带消息同时到达，验证队列溢出处理</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">DP-036</td>
+                            <td>非法边带消息</td>
+                            <td>收到未定义/保留的边带消息类型，验证忽略或报错</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#8b5cf6;">
+                    <span style="color:#8b5cf6;">●</span> 物理层测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖链路训练、均衡、速率协商、Lane 操作等所有物理层验证点</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">PH-001</td>
+                            <td>TS1 有序集检测</td>
+                            <td>接收端正确检测 TS1 有序集并建立 Bit Lock</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-002</td>
+                            <td>TS2 有序集检测</td>
+                            <td>接收端正确检测 TS2 有序集并建立 Symbol Lock</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-003</td>
+                            <td>Bit/Symbol Lock 时间测量</td>
+                            <td>从上电到 Bit/Symbol Lock 的时间符合规范</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-004</td>
+                            <td>Lane 对齐（多 Lane）</td>
+                            <td>x4/x8/x16 场景下多 Lane 的 Symbol 对齐正确性</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-005</td>
+                            <td>Lane Deskew 压力</td>
+                            <td>各 Lane 到达时间差异接近上限，验证 Deskew 正确性</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-006</td>
+                            <td>8 GT/s 速率训练</td>
+                            <td>Gen1 (8 GT/s) 速率下完整训练流程</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-007</td>
+                            <td>16 GT/s 速率训练</td>
+                            <td>Gen2 (16 GT/s) 速率训练与均衡（EQ Phase 0-3）</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-008</td>
+                            <td>32 GT/s 速率训练</td>
+                            <td>Gen3 (32 GT/s) 速率训练与均衡，含 Preshoot/De-emphasis</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-009</td>
+                            <td>速率切换 8→16 GT/s</td>
+                            <td>运行中从 8 GT/s 动态切换到 16 GT/s</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-010</td>
+                            <td>速率切换 16→32 GT/s</td>
+                            <td>运行中从 16 GT/s 动态切换到 32 GT/s</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-011</td>
+                            <td>速率切换 32→8 GT/s</td>
+                            <td>运行中从 32 GT/s 动态切换回 8 GT/s（降级场景）</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-012</td>
+                            <td>速率切换时流量处理</td>
+                            <td>速率切换期间有 pending 流量，验证处理（暂停/丢弃/完成）</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-013</td>
+                            <td>均衡 Phase 0 训练</td>
+                            <td>Verify EQ Phase 0 (preset negotiation) correctness</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-014</td>
+                            <td>均衡 Phase 1 训练</td>
+                            <td>Verify EQ Phase 1 (coefficient request/response) correctness</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-015</td>
+                            <td>均衡 Phase 2 训练</td>
+                            <td>Verify EQ Phase 2 (coefficient update) correctness</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-016</td>
+                            <td>均衡 Phase 3 训练</td>
+                            <td>Verify EQ Phase 3 (final EQ settings) correctness</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-017</td>
+                            <td>均衡训练失败处理</td>
+                            <td>均衡训练无法收敛时，验证降级到更低速率或报错</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-018</td>
+                            <td>Preset 遍历测试</td>
+                            <td>遍历所有 PCIe 预设 Preset (P0-P10)，验证均衡结果</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-019</td>
+                            <td>Lane 反转检测</td>
+                            <td>PHY 层正确检测 Lane 反转并修正 Lane 序号映射</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-020</td>
+                            <td>极性反转检测与修正</td>
+                            <td>数据极性自动检测（8b/10b or 128b/130b）并反转修正</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-021</td>
+                            <td>宽度自适应降级 x16→x8</td>
+                            <td>部分 Lane 失效时自动从 x16 降级到 x8</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-022</td>
+                            <td>宽度自适应降级 x8→x4</td>
+                            <td>部分 Lane 失效时自动从 x8 降级到 x4</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-023</td>
+                            <td>Lane 修复（冗余 Lane）</td>
+                            <td>UCIe 支持冗余 Lane，验证失效 Lane 切换到冗余 Lane</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-024</td>
+                            <td>单 Lane 运行</td>
+                            <td>仅 1 条 Lane 可用时（x1），验证链路仍能工作</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-025</td>
+                            <td>Lane 随机失效恢复</td>
+                            <td>随机注入 Lane 失效，验证自动检测与恢复/降级</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-026</td>
+                            <td>时钟域交叉稳定性</td>
+                            <td>TX 与 RX 时钟异步场景下，验证 FIFO/弹性缓冲区无溢出</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-027</td>
+                            <td>建立/保持时间违例</td>
+                            <td>在时序边界条件下验证 Setup/Hold 时间满足规范</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Timing</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PH-028</td>
+                            <td>BER 压力测试</td>
+                            <td>注入不同比特错误率（1e-12 ~ 1e-9），验证链路仍能训练</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#10b981;">
+                    <span style="color:#10b981;">●</span> 协议层测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖 PCIe、CXL、AXI/ACE 等所有协议映射验证点</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">PL-001</td>
+                            <td>PCIe TLP 封装</td>
+                            <td>PCIe TLP 正确封装到 UCIe FLIT 格式，头部字段映射正确</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-002</td>
+                            <td>PCIe TLP 解封装</td>
+                            <td>接收端正确解析 UCIe FLIT 并恢复原始 TLP</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-003</td>
+                            <td>PCIe Ordering 规则遵守</td>
+                            <td>TLP 排序规则（强序/弱序）在 UCIe 链路上得到遵守</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-004</td>
+                            <td>PCIe Max Payload Size</td>
+                            <td>不同 MPS 配置（128B~4096B）下的 TLP 分片与重组</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-005</td>
+                            <td>PCIe Tag 管理</td>
+                            <td>Non-Posted 请求的 Tag 分配与释放，避免 Tag 溢出</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-006</td>
+                            <td>PCIe Flow Control（三类型）</td>
+                            <td>Posted/Non-Posted/Completion 三种 Flow Control 独立管理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-007</td>
+                            <td>PCIe AER 错误处理</td>
+                            <td>高级错误报告（AER）寄存器正确更新与上报</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-008</td>
+                            <td>PCIe 多流量等级</td>
+                            <td>TC0~TC7 多流量等级的正确映射与隔离</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-009</td>
+                            <td>CXL.io TLP 处理</td>
+                            <td>CXL.io TLP 正确映射到 UCIe，功能等同 PCIe</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-010</td>
+                            <td>CXL.mem 请求/响应</td>
+                            <td>CXL.mem Memory Request/Response 正确封装与处理</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-011</td>
+                            <td>CXL.cache 缓存维护</td>
+                            <td>CXL.cache Snoop/DDSP/RDSP 等缓存一致性事务正确处理</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-012</td>
+                            <td>CXL 多协议并发</td>
+                            <td>CXL.io + CXL.mem + CXL.cache 同时传输，验证隔离与仲裁</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-013</td>
+                            <td>CXL 复位处理</td>
+                            <td>Warm Reset / Cache Reset / IO Reset 的正确处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-014</td>
+                            <td>CXL 后端存储变更</td>
+                            <td>Backend memory attribute 变更时，验证缓存一致性正确维护</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-015</td>
+                            <td>AXI4 写事务</td>
+                            <td>AXI4 Write Transaction（AW/W/B 通道）正确映射到 UCIe</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-016</td>
+                            <td>AXI4 读事务</td>
+                            <td>AXI4 Read Transaction（AR/R 通道）正确映射到 UCIe</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-017</td>
+                            <td>AXI 乱序响应</td>
+                            <td>Out-of-Order 写/读响应的正确重组与数据完整性</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-018</td>
+                            <td>AXI 突发跨 4KB</td>
+                            <td>AXI 突发传输跨越 4KB 边界时，验证地址绕回或拆分处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-019</td>
+                            <td>AXI 独占访问</td>
+                            <td>AXI Exclusive Access（ARESETn=0 场景）的正确处理</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-020</td>
+                            <td>ACE 缓存一致性</td>
+                            <td>ACE 协议 Snoop 请求/响应的正确处理与缓存状态更新</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-021</td>
+                            <td>ACE Snoop Filter</td>
+                            <td>Snoop Filter 命中/未命中场景，验证是否正确转发</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-022</td>
+                            <td>多协议动态切换</td>
+                            <td>运行时从 PCIe 切换到 CXL（需链路重训练），验证正确性</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PL-023</td>
+                            <td>协议类型不匹配</td>
+                            <td>一端配置为 PCIe、另一端为 CXL，验证错误上报而非静默错误</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#f59e0b;">
+                    <span style="color:#f59e0b;">●</span> 电源管理测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖 L1、L2、时钟/电源门控等所有低功耗验证点</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">PM-001</td>
+                            <td>L1 进入条件检查</td>
+                            <td>满足所有条件（无 pending TLP、Link 空闲）时正确进入 L1</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-002</td>
+                            <td>L1 进入有时延 Pending TLP</td>
+                            <td>L1 进入请求时仍有 pending TLP，验证完成发送后再进入</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-003</td>
+                            <td>L1 退出唤醒延迟</td>
+                            <td>测量从唤醒信号到 Link Active 的延迟，符合 UCIe 规范</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-004</td>
+                            <td>L1 快速进入/退出循环</td>
+                            <td>反复快速进入/退出 L1，验证无状态机死锁</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-005</td>
+                            <td>L1 期间 PME 消息</td>
+                            <td>L1 低功耗期间收到 PME 消息，验证正确唤醒</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-006</td>
+                            <td>L1 no-Hot-Reset 退出</td>
+                            <td>L1 退出时不进行完整重训练（Hot Reset），验证快速唤醒</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-007</td>
+                            <td>L2 进入流程</td>
+                            <td>主电源关断前正确完成 L2 进入握手</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-008</td>
+                            <td>L2 Sideband 唤醒</td>
+                            <td>L2 期间通过 Sideband 信号唤醒，验证完整重训练</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-009</td>
+                            <td>L2 唤醒重训练时间</td>
+                            <td>测量 L2 唤醒后完整重训练时间，符合规范上限</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-010</td>
+                            <td>L2 期间 Sideband 消息</td>
+                            <td>L2 期间 Sideband 消息的正确性（仅部分消息有效）</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-011</td>
+                            <td>细粒度时钟门控</td>
+                            <td>各模块根据空闲状态独立时钟门控，验证无功能影响</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-012</td>
+                            <td>时钟门控唤醒延迟</td>
+                            <td>时钟门控状态下收到数据，测量唤醒延迟</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-013</td>
+                            <td>电源门控状态保持</td>
+                            <td>电源门控时关键寄存器/状态正确保持（Retention Flip-Flop）</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-014</td>
+                            <td>电源门控恢复流程</td>
+                            <td>电源门控退出后正确恢复所有状态并继续操作</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-015</td>
+                            <td>动态电压频率调整</td>
+                            <td>运行中调整电压和频率（DVFS），验证链路稳定性</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-016</td>
+                            <td>非对称功耗状态</td>
+                            <td>两端处于不同功耗状态（一端 L1、一端 Active），验证合法性及处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PM-017</td>
+                            <td>功耗状态切换竞争</td>
+                            <td>两端同时发起功耗状态切换请求，验证仲裁正确性</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#ef4444;">
+                    <span style="color:#ef4444;">●</span> 错误恢复测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖 CRC 错误、Recovery、Lane 失效等所有错误场景</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">ER-001</td>
+                            <td>单比特 CRC 错误</td>
+                            <td>注入 1 比特错误，验证 CRC 检测并重传</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-002</td>
+                            <td>多比特 CRC 错误</td>
+                            <td>注入多比特错误（2/3/多个），验证均能检测</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-003</td>
+                            <td>突发 CRC 错误</td>
+                            <td>连续多个包都有 CRC 错误，验证批量重传与恢复</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-004</td>
+                            <td>FLIT 头部错误</td>
+                            <td>FLIT 头部（非 CRC 字段）损坏，验证检测机制</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-005</td>
+                            <td>FLIT 尾部错误</td>
+                            <td>FLIT 尾部字节损坏，验证 CRC 覆盖完整性</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-006</td>
+                            <td>链路 Recovery 触发</td>
+                            <td>错误次数超阈值触发 Recovery，验证状态机转换</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-007</td>
+                            <td>Recovery 训练序列</td>
+                            <td>Recovery 状态下正确发送 TS 序列并重新锁定</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-008</td>
+                            <td>Recovery 成功返回 Active</td>
+                            <td>Recovery 训练成功后正确返回 Active 状态继续传输</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-009</td>
+                            <td>Recovery 失败处理</td>
+                            <td>Recovery 训练多次失败，验证最终报错或断开处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-010</td>
+                            <td>Recovery 中再次发生错误</td>
+                            <td>Recovery 过程中再次发生错误（嵌套错误），验证处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-011</td>
+                            <td>单 Lane 失效检测</td>
+                            <td>单条 Lane 信号丢失，验证正确检测并降级</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-012</td>
+                            <td>多 Lane 同时失效</td>
+                            <td>多条 Lane 同时失效，验证宽度降级或进入错误状态</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-013</td>
+                            <td>Lane 失效恢复</td>
+                            <td>Lane 失效后信号恢复，验证是否能重新升级宽度</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-014</td>
+                            <td>Lane 摇摆（间歇失效）</td>
+                            <td>Lane 间歇性地失效/恢复，验证链路稳定性</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-015</td>
+                            <td>弹性缓冲区溢出</td>
+                            <td>RX 弹性缓冲区满时继续接收数据，验证反压或丢包处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-016</td>
+                            <td>弹性缓冲区下溢</td>
+                            <td>RX 弹性缓冲区空时读取，验证不会越界</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-017</td>
+                            <td>重传缓冲区满</td>
+                            <td>重传缓冲区达到容量上限，验证新包处理策略</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-018</td>
+                            <td>非法包类型</td>
+                            <td>收到 UCIe 未定义的包类型，验证忽略或报错</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-019</td>
+                            <td>序列号乱序</td>
+                            <td>收到序列号不连续的包（非重传场景），验证处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Error Injection</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-020</td>
+                            <td>超时无响应</td>
+                            <td>对端超时无响应（死节点），验证 Watchdog 触发</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-021</td>
+                            <td>持续错误压力测试</td>
+                            <td>长时间（数亿周期）持续注入随机错误，验证链路不崩溃</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">ER-022</td>
+                            <td>错误 + 低功耗组合</td>
+                            <td>错误恢复过程中同时收到低功耗请求，验证处理顺序</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#06b6d4;">
+                    <span style="color:#06b6d4;">●</span> 性能测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖带宽、延迟、反压、持续运行等所有性能验证点</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">PF-001</td>
+                            <td>最大吞吐量测量（8 GT/s）</td>
+                            <td>测量 8 GT/s 下的最大实际吞吐量，含开销</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-002</td>
+                            <td>最大吞吐量测量（16 GT/s）</td>
+                            <td>测量 16 GT/s 下的最大实际吞吐量</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-003</td>
+                            <td>最大吞吐量测量（32 GT/s）</td>
+                            <td>测量 32 GT/s 下的最大实际吞吐量</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-004</td>
+                            <td>小包性能（64B）</td>
+                            <td>64 字节小包场景下的带宽利用率</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-005</td>
+                            <td>大包性能（最大 FLIT）</td>
+                            <td>最大 FLIT 大小场景下的带宽利用率</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-006</td>
+                            <td>混合包长性能</td>
+                            <td>随机包长混合场景下的实际带宽</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-007</td>
+                            <td>端到端延迟测量</td>
+                            <td>测量从协议层入口到出口的端到端延迟</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-008</td>
+                            <td>P50/P99 延迟分布</td>
+                            <td>统计大量样本下的延迟分布（平均值/P50/P99/P999）</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-009</td>
+                            <td>反压下的延迟</td>
+                            <td>接收端施加反压时，测量延迟增加量</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-010</td>
+                            <td>低功耗唤醒延迟</td>
+                            <td>L1/L2 唤醒后的第一笔事务延迟</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-011</td>
+                            <td>持续满带宽压力</td>
+                            <td>长时间（数亿周期）满带宽传输，验证无死锁或性能降级</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-012</td>
+                            <td>多 VC 公平性</td>
+                            <td>多个虚拟通道同时有流量，验证带宽分配公平性</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-013</td>
+                            <td>QoS 优先级验证</td>
+                            <td>不同 QoS 等级的流量同时存在，验证高优先级优先</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-014</td>
+                            <td>Back-to-Back 事务</td>
+                            <td>背靠背连续事务，验证流水线效率</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">PF-015</td>
+                            <td>最大未完成事务数</td>
+                            <td>测量最大支持的 Outstanding Transaction 数量及影响</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Measurement</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#9ca3af;">
+                    <span style="color:#9ca3af;">●</span> 寄存器测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖所有 CSRs 的可编程性、默认值及保护验证</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">CS-001</td>
+                            <td>Controller 寄存器默认值</td>
+                            <td>所有寄存器上电默认值符合 UCIe 规范</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">CS-002</td>
+                            <td>寄存器可编程性</td>
+                            <td>所有可读写寄存器字段正确响应写操作</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">CS-003</td>
+                            <td>只读字段保护</td>
+                            <td>只读字段（RO/ROS/RW1C 等）不会被错误写入</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">CS-004</td>
+                            <td>寄存器复位行为</td>
+                            <td>各类复位（Cold/Warm/Hot）后寄存器正确复位</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">CS-005</td>
+                            <td>中断状态寄存器</td>
+                            <td>中断状态寄存器正确置位与清除（RW1C）</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">CS-006</td>
+                            <td>中断屏蔽控制</td>
+                            <td>中断屏蔽位正确屏蔽对应中断信号</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">CS-007</td>
+                            <td>性能计数器读数</td>
+                            <td>性能计数器（发送包数、错误数等）正确累加</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">CS-008</td>
+                            <td>Vendor ID / Revision ID</td>
+                            <td>厂商 ID 和版本 ID 寄存器正确可读</td>
+                            <td class="priority-low">Low</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#ec4899;">
+                    <span style="color:#ec4899;">●</span> 复位测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖 Cold/Warm/Hot Reset 及频繁复位等所有复位场景</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">RS-001</td>
+                            <td>Cold Reset 完整流程</td>
+                            <td>冷复位触发完整初始化，所有状态机回到初始状态</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">RS-002</td>
+                            <td>Warm Reset 保留配置</td>
+                            <td>热复位保留配置寄存器，仅重新训练链路</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">RS-003</td>
+                            <td>Hot Reset 对端同步</td>
+                            <td>热复位信号通过链路传递到对端，双方同步复位</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">RS-004</td>
+                            <td>复位期间流量处理</td>
+                            <td>复位请求到来时仍有 pending 流量，验证正确处理</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">RS-005</td>
+                            <td>复位后参数重协商</td>
+                            <td>复位后正确重新协商所有链路参数</td>
+                            <td class="priority-high">High</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">RS-006</td>
+                            <td>频繁复位压力测试</td>
+                            <td>短时间内多次复位，验证状态机无卡死</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Stress</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+            <div class="testplan-section animate-on-scroll">
+                <div class="testplan-section-title" style="color:#f97316;">
+                    <span style="color:#f97316;">●</span> Security & Integrity 测试用例
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">涵盖数据完整性、非法包过滤、配置锁定及访问保护验证</p>
+                <div class="table-container">
+                <table class="testplan-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>测试用例</th>
+                            <th>描述</th>
+                            <th>优先级</th>
+                            <th>验证策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td class="tc-id">SEC-001</td>
+                            <td>数据完整性端到端校验</td>
+                            <td>从协议层入口到出口的完整数据路径校验，确保无静默数据损坏</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">SEC-002</td>
+                            <td>非法协议包过滤</td>
+                            <td>收到格式错误或未定义的协议包时正确丢弃或报错，不传播未知行为</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed+Random</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">SEC-003</td>
+                            <td>配置锁定寄存器（Lock bit）</td>
+                            <td>关键配置寄存器锁定后无法被修改，直到解锁或复位</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                        <tr>
+                            <td class="tc-id">SEC-004</td>
+                            <td>特权寄存器访问保护</td>
+                            <td>安全相关寄存器仅允许特权访问，非特权访问返回错误</td>
+                            <td class="priority-medium">Medium</td>
+                            <td><span class="strategy-tag">Directed</span></td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        
+        </section>
+    
+        <!-- Corner Cases -->
+        <section class="section" id="corner">
+            <div class="section-header animate-on-scroll">
+                <div class="tag">Corner Cases</div>
+                <h2>Corner Case 场景 spotlight</h2>
+                <p>以下场景属于边界条件或异常组合，是芯片验证中最容易遗漏、但也是最容易出 bug 的地方</p>
+            </div>
+            <div class="corner-grid">
+    
+                <div class="corner-card animate-on-scroll" data-category="d2d">
+                    <div class="corner-icon">🔀</div>
+                    <div class="corner-title">训练中动态宽度降级</div>
+                    <div class="corner-desc">链路已进入 Active 状态后，部分 Lane 失效，验证动态宽度降级（x16→x8→x4）的正确性，包括 Credit 重协商、流控重新初始化。</div>
+                    <div class="corner-tags"><span class="corner-tag">DP-009</span><span class="corner-tag">DP-021</span><span class="corner-tag">ER-011</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="phy">
+                    <div class="corner-icon">⚡</div>
+                    <div class="corner-title">速率切换时 Pending TLP</div>
+                    <div class="corner-desc">在 16→32 GT/s 速率切换过程中，发送端有 pending TLP 未完成，验证是否暂停发送、完成切换后继续，或丢弃并重传。</div>
+                    <div class="corner-tags"><span class="corner-tag">PH-012</span><span class="corner-tag">DP-015</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="error">
+                    <div class="corner-icon">🔥</div>
+                    <div class="corner-title">CRC 错误 + L1 进入竞争</div>
+                    <div class="corner-desc">CRC 错误触发 Recovery 的同时，对端发起 L1 进入请求，验证仲裁逻辑与处理顺序（应先完成错误恢复再进入低功耗）。</div>
+                    <div class="corner-tags"><span class="corner-tag">ER-022</span><span class="corner-tag">PM-001</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="perf">
+                    <div class="corner-icon">📦</div>
+                    <div class="corner-title">最大 FLIT 大小压力</div>
+                    <div class="corner-desc">使用最大 FLIT 大小（含 CRC 字段）持续发送，验证缓冲区边界、CRC 计算及重传缓冲区的处理能力。</div>
+                    <div class="corner-tags"><span class="corner-tag">DP-008</span><span class="corner-tag">PF-005</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="error">
+                    <div class="corner-icon">🔄</div>
+                    <div class="corner-title">重传过程中再次发生错误</div>
+                    <div class="corner-desc">重传缓冲区中的包在重传过程中再次出错（嵌套错误），验证是否能够正确处理（丢弃并重新请求）。</div>
+                    <div class="corner-tags"><span class="corner-tag">ER-010</span><span class="corner-tag">DP-030</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="d2d">
+                    <div class="corner-icon">⏱️</div>
+                    <div class="corner-title">Credit 返回包丢失</div>
+                    <div class="corner-desc">Credit Return 包在链路上丢失（随机丢包），验证发送端在超时后重新请求 Credit 或触发 Recovery。</div>
+                    <div class="corner-tags"><span class="corner-tag">DP-021</span><span class="corner-tag">ER-020</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="pm">
+                    <div class="corner-icon">🌡️</div>
+                    <div class="corner-title">温度/电压变化模拟</div>
+                    <div class="corner-desc">模拟温度或电压变化导致信号质量下降，验证链路是否能自动触发重训练或速率降级。</div>
+                    <div class="corner-tags"><span class="corner-tag">PH-017</span><span class="corner-tag">PM-015</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="d2d">
+                    <div class="corner-icon">🔢</div>
+                    <div class="corner-title">序列号回绕边界</div>
+                    <div class="corner-desc">序列号达到最大值（如 4095）后回绕到 0，验证接收端是否正确识别新包而非认为是重传包。</div>
+                    <div class="corner-tags"><span class="corner-tag">DP-028</span><span class="corner-tag">ER-019</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="d2d">
+                    <div class="corner-icon">📊</div>
+                    <div class="corner-title">多 VC 同时饥饿</div>
+                    <div class="corner-desc">多个虚拟通道同时面临 Credit 耗尽，验证仲裁逻辑是否会导致某个 VC 长期饥饿（Starvation）。</div>
+                    <div class="corner-tags"><span class="corner-tag">DP-020</span><span class="corner-tag">PF-012</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="pm">
+                    <div class="corner-icon">🔌</div>
+                    <div class="corner-title">L2 期间 Sideband 消息丢失</div>
+                    <div class="corner-desc">L2 低功耗期间 Sideband 唤醒信号因噪声被识别为多次，验证去抖逻辑及是否会误触发。</div>
+                    <div class="corner-tags"><span class="corner-tag">PM-010</span><span class="corner-tag">ER-018</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="d2d">
+                    <div class="corner-icon">🧩</div>
+                    <div class="corner-title">Lane 修复后参数重协商</div>
+                    <div class="corner-desc">使用冗余 Lane 修复失效 Lane 后，验证是否需要重新进行参数交换（部分参数可能变化）。</div>
+                    <div class="corner-tags"><span class="corner-tag">DP-004</span><span class="corner-tag">ER-013</span></div>
+                </div>
+        
+                <div class="corner-card animate-on-scroll" data-category="error">
+                    <div class="corner-icon">♾️</div>
+                    <div class="corner-title">无限重传压力</div>
+                    <div class="corner-desc">对端持续返回 NACK（异常对端），验证重传次数达到上限后的错误处理（断开链路或上报致命错误）。</div>
+                    <div class="corner-tags"><span class="corner-tag">DP-029</span><span class="corner-tag">ER-009</span></div>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- Verification Strategy -->
+        <section class="section" id="strategy">
+            <div class="section-header animate-on-scroll">
+                <div class="tag">Strategy</div>
+                <h2>验证策略与方法学</h2>
+                <p>采用多种验证方法组合，确保 UCIe Controller 验证的全面性与深度</p>
+            </div>
+            <div class="strategy-grid">
+    
+                <div class="strategy-card animate-on-scroll">
+                    <div class="strategy-icon" style="background:var(--gradient-blue);">🎯</div>
+                    <div class="strategy-title">直接测试</div>
+                    <div class="strategy-desc">针对每个功能点编写定向测试用例，覆盖正常流程、边界条件和错误场景。</div>
+                    <ul class="strategy-list">
+                        <li>所有 High 优先级用例</li><li>状态机转换测试</li><li>寄存器编程测试</li><li>错误注入测试</li>
+                    </ul>
+                </div>
+        
+                <div class="strategy-card animate-on-scroll">
+                    <div class="strategy-icon" style="background:var(--gradient-purple);">🎲</div>
+                    <div class="strategy-title">随机测试</div>
+                    <div class="strategy-desc">使用约束随机方法生成测试激励，覆盖定向测试难以覆盖的场景组合。</div>
+                    <ul class="strategy-list">
+                        <li>约束随机包长/时延</li><li>随机 Lane 失效注入</li><li>随机 Credit 返回延迟</li><li>多线程并发场景</li>
+                    </ul>
+                </div>
+        
+                <div class="strategy-card animate-on-scroll">
+                    <div class="strategy-icon" style="background:var(--gradient-green);">📊</div>
+                    <div class="strategy-title">覆盖率驱动</div>
+                    <div class="strategy-desc">以功能覆盖率为导向，分析覆盖漏洞并补充测试用例，确保验证完整性。</div>
+                    <ul class="strategy-list">
+                        <li>功能覆盖率收集</li><li>代码覆盖率分析</li><li>覆盖率交叉分析</li><li>覆盖漏洞补用例</li>
+                    </ul>
+                </div>
+        
+                <div class="strategy-card animate-on-scroll">
+                    <div class="strategy-icon" style="background:var(--gradient-amber);">🔧</div>
+                    <div class="strategy-title">错误注入</div>
+                    <div class="strategy-desc">在 RTL 或 TB 中注入各类错误，验证 DUT 的错误检测与恢复机制。</div>
+                    <ul class="strategy-list">
+                        <li>CRC 错误注入</li><li>Lane 失效注入</li><li>寄存器错误注入</li><li>时钟抖动注入</li>
+                    </ul>
+                </div>
+        
+                <div class="strategy-card animate-on-scroll">
+                    <div class="strategy-icon" style="background:linear-gradient(135deg, #dc2626, #ef4444);">⚡</div>
+                    <div class="strategy-title">断言检查</div>
+                    <div class="strategy-desc">在关键接口和内部节点添加 SVA 断言，实时检查协议合规性和时序关系。</div>
+                    <ul class="strategy-list">
+                        <li>协议时序断言</li><li>流控不溢出断言</li><li>状态机合法性断言</li><li>死亡条件检查</li>
+                    </ul>
+                </div>
+        
+                <div class="strategy-card animate-on-scroll">
+                    <div class="strategy-icon" style="background:linear-gradient(135deg, #0891b2, #06b6d4);">🏃</div>
+                    <div class="strategy-title">压力测试</div>
+                    <div class="strategy-desc">长时间、高负载运行测试，验证链路在极端条件下的稳定性和可靠性。</div>
+                    <ul class="strategy-list">
+                        <li>持续满带宽传输</li><li>频繁低功耗切换</li><li>随机复位压力</li><li>温度/电压变化模拟</li>
+                    </ul>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- Coverage -->
+        <section class="section" id="coverage">
+            <div class="section-header animate-on-scroll">
+                <div class="tag">Coverage Plan</div>
+                <h2>覆盖率验证计划</h2>
+                <p>制定全面的覆盖率收集策略，确保验证的完整性与质量</p>
+            </div>
+            <div class="coverage-grid">
+                <div class="coverage-card animate-on-scroll">
+                    <div class="cov-circle">
+                        <svg viewBox="0 0 120 120">
+                            <circle class="track" cx="60" cy="60" r="50"/>
+                            <circle class="fill" cx="60" cy="60" r="50"
+                                stroke="#3b82f6" stroke-dasharray="314" stroke-dashoffset="31"/>
+                        </svg>
+                        <div class="cov-value" style="color:#3b82f6;">90%</div>
+                    </div>
+                    <div class="cov-label">代码覆盖率目标</div>
+                    <div class="cov-desc">Line / Branch / Toggle</div>
+                </div>
+                <div class="coverage-card animate-on-scroll">
+                    <div class="cov-circle">
+                        <svg viewBox="0 0 120 120">
+                            <circle class="track" cx="60" cy="60" r="50"/>
+                            <circle class="fill" cx="60" cy="60" r="50"
+                                stroke="#10b981" stroke-dasharray="314" stroke-dashoffset="16"/>
+                        </svg>
+                        <div class="cov-value" style="color:#10b981;">95%</div>
+                    </div>
+                    <div class="cov-label">功能覆盖率目标</div>
+                    <div class="cov-desc">Feature / Cross Coverage</div>
+                </div>
+                <div class="coverage-card animate-on-scroll">
+                    <div class="cov-circle">
+                        <svg viewBox="0 0 120 120">
+                            <circle class="track" cx="60" cy="60" r="50"/>
+                            <circle class="fill" cx="60" cy="60" r="50"
+                                stroke="#8b5cf6" stroke-dasharray="314" stroke-dashoffset="63"/>
+                        </svg>
+                        <div class="cov-value" style="color:#8b5cf6;">80%</div>
+                    </div>
+                    <div class="cov-label">断言覆盖率目标</div>
+                    <div class="cov-desc">SVA / Protocol Checker</div>
+                </div>
+                <div class="coverage-card animate-on-scroll">
+                    <div class="cov-circle">
+                        <svg viewBox="0 0 120 120">
+                            <circle class="track" cx="60" cy="60" r="50"/>
+                            <circle class="fill" cx="60" cy="60" r="50"
+                                stroke="#f59e0b" stroke-dasharray="314" stroke-dashoffset="94"/>
+                        </svg>
+                        <div class="cov-value" style="color:#f59e0b;">70%</div>
+                    </div>
+                    <div class="cov-label">FSM 覆盖率目标</div>
+                    <div class="cov-desc">State Machine Transitions</div>
+                </div>
+            </div>
+
+            <!-- Coverage Details -->
+            <div style="margin-top:2.5rem;" class="animate-on-scroll">
+                <div class="arch-diagram">
+                    <h3 style="font-size:1.05rem;margin-bottom:1.2rem;color:var(--accent-blue);">📋 覆盖率收集详细策略</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;">
+                        <div>
+                            <h4 style="color:var(--accent-green);margin-bottom:0.6rem;font-size:0.88rem;">✅ 功能覆盖率点</h4>
+                            <ul style="list-style:none;padding:0;">
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 所有 Lane 宽度 (x4/x8/x16/x2)</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 所有数据速率 (8/16/32 GT/s)</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 所有协议类型 (PCIe/CXL/AXI/CXS)</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 所有低功耗状态 (L1/L2/L1SS)</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• CRC 错误率交叉 (0.1%/1%/5%/10%)</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• Credit 耗尽/恢复所有 VC</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 所有复位类型 (Cold/Warm/Hot)</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• EQ Preset 全部遍历 (P0-P10)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color:var(--accent-cyan);margin-bottom:0.6rem;font-size:0.88rem;">🔍 断言检查点</h4>
+                            <ul style="list-style:none;padding:0;">
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 协议时序断言 (Setup/Hold/Valid-Ready)</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 流控 Credit 不溢出不欠载</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 重传窗口不溢出</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 低功耗状态转换合法性</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 参数交换完整性检查</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 中断处理无丢失</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• FLIT 序列号单调性</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• Sideband 消息格式合法性</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color:var(--accent-amber);margin-bottom:0.6rem;font-size:0.88rem;">📊 回归测试策略</h4>
+                            <ul style="list-style:none;padding:0;">
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 每次提交：冒烟测试（10 核心用例）</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 每晚回归：Sanity + 主要功能（~30 用例）</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 每周全量：所有 159 用例 + 随机</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 覆盖率每周收集与分析审查</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 签出前：Gate-level 仿真 + 时序验证</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 可选：FPGA 原型验证（加速）</li>
+                                <li style="padding:3px 0;font-size:0.82rem;color:var(--text-secondary);">• 功耗验证：UPF/CPF 低功耗仿真</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    
+        <footer class="footer">
+            <p>UCIe Controller Verification Plan v2.0 · 面向资深数字验证工程师</p>
+            <p style="margin-top:0.5rem;">
+                Generated with ❤️ for chip verification community ·
+                <a href="https://github.com">View on GitHub</a> ·
+                共 9 大验证模块 · 159 详细测试用例
+            </p>
+        </footer>
+    </body>
+    </html>
+    
+    <script>
+        // Animate stats on load
+        function animateValue(el, target, suffix = '') {
+            let current = 0;
+            const step = Math.max(1, Math.ceil(target / 60));
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                el.textContent = current + suffix;
+            }, 25);
+        }
+
+        const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateValue(document.getElementById('stat-features'), 30, '+');
+                    animateValue(document.getElementById('stat-testcases'), 159);
+
+                    animateValue(document.getElementById('stat-high'), 40, '+');
+                    animateValue(document.getElementById('stat-layers'), 9);
+                    heroObserver.disconnect();
+                }
+            });
+        }, { threshold: 0.3 });
+        heroObserver.observe(document.querySelector('.hero'));
+
+        // Scroll animations
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            scrollObserver.observe(el);
+        });
+
+        // Filter features
+        function filterFeatures(category, tabEl) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            tabEl.classList.add('active');
+            document.querySelectorAll('.feature-card').forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = '';
+                    card.style.animation = 'fadeInUp 0.4s ease-out';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Smooth scroll nav
+        document.querySelectorAll('.navbar-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.querySelectorAll('.navbar-links a').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+
+        // Update active nav on scroll
+        const sections = ['overview', 'architecture', 'features', 'testplan', 'corner', 'strategy', 'coverage'];
+        window.addEventListener('scroll', () => {
+            const scrollPos = window.scrollY + 200;
+            for (const id of sections) {
+                const el = document.getElementById(id);
+                if (el && el.offsetTop <= scrollPos && el.offsetTop + el.offsetHeight > scrollPos) {
+                    document.querySelectorAll('.navbar-links a').forEach(l => l.classList.remove('active'));
+                    const activeLink = document.querySelector(`.navbar-links a[href="#${id}"]`);
+                    if (activeLink) activeLink.classList.add('active');
+                    break;
+                }
+            }
+        });
+
+        // Coverage circle animation
+        const coverageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.querySelectorAll('.fill').forEach(el => {
+                        const targetOffset = el.getAttribute('stroke-dashoffset');
+                        el.style.strokeDashoffset = '314';
+                        setTimeout(() => { el.style.strokeDashoffset = targetOffset; }, 100);
+                    });
+                    coverageObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('.coverage-card').forEach(card => {
+            coverageObserver.observe(card);
+        });
+    </script>
+    
+</body>
+</html>
